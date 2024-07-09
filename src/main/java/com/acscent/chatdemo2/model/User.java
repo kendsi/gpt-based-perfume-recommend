@@ -1,8 +1,7 @@
 package com.acscent.chatdemo2.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,11 +10,11 @@ import lombok.Setter;
 public class User {
     
     private String name;
-    private String id;
+    private String email;
     // 전화번호 등
     private String code;
 
-    private Date birthDay;
+    private LocalDate birthDay;
 
     private Boolean flag;
 
@@ -25,11 +24,18 @@ public class User {
         MALE, FEMALE
     }
 
-    @Builder
-    public User(String name, String id, Date birthDay, GENDER gender) {
+    public User(String name, String email, String code, LocalDate birthDay, GENDER gender) {
         this.name = name;
-        this.id = id;
+        this.email = email;
+        this.code = code;
         this.birthDay = birthDay;
         this.gender = gender;
     }
+
+    public User(String email, String code) {
+        this.email = email;
+        this.code = code;
+    }
+
+    public User() {}
 }

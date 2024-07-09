@@ -1,5 +1,7 @@
 package com.acscent.chatdemo2.model;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,12 +14,12 @@ public class Chat {
     private String middleNote;
     private String baseNote;
     
-    private Image image;
+    private MultipartFile image;
 
     private User user;
 
     @Builder
-    public Chat(String topNote, String middleNote, String baseNote, Image image, User user) {
+    public Chat(String topNote, String middleNote, String baseNote, MultipartFile image, User user) {
         this.topNote = topNote;
         this.middleNote = middleNote;
         this.baseNote = baseNote;
