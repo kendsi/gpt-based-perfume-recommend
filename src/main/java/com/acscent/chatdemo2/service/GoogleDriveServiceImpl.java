@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class GoogleDriveServiceImpl implements GoogleDriveService {
 
-    private static final String APPLICATION_NAME = "winter-jet-186516";
+    private static final String APPLICATION_NAME = "perfume-maker";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> DRIVE_SCOPES = Collections.singletonList(DriveScopes.DRIVE);
@@ -72,7 +72,9 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
             .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
             .build();
-        return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver.Builder().setPort(8888).build()).authorize("user");
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        return credential;
     }
 
     @Async

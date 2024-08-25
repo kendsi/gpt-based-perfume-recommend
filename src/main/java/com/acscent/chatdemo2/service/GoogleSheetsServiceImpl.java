@@ -34,7 +34,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
-    private static final String APPLICATION_NAME = "winter-jet-186516";
+    private static final String APPLICATION_NAME = "perfume-maker";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private static final List<String> SHEET_SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
@@ -67,7 +67,9 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
             .build();
-        return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver.Builder().setPort(8888).build()).authorize("user");
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        return credential;
     }
 
     @Override
