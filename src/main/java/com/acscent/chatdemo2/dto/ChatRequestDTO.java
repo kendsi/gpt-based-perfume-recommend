@@ -1,19 +1,20 @@
 package com.acscent.chatdemo2.dto;
 
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
+@Builder
 public class ChatRequestDTO {
 
-    private String model;
-    private List<Message> messages;
-
-    public ChatRequestDTO(String model, List<Message> messages) {
-        this.model = model;
-        this.messages = messages;
-    }
+    private String name;
+    private String gender;
+    private String language;
+    private String code;
+    private MultipartFile image;
 }

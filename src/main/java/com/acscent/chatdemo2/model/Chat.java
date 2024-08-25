@@ -1,29 +1,23 @@
 package com.acscent.chatdemo2.model;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
+@Builder
 public class Chat {
 
+    private String perfumeName;
+    private List<String> insights;
     private String topNote;
     private String middleNote;
     private String baseNote;
-    
-    private MultipartFile image;
+    private String summary;
+    private String imagePath;
 
     private User user;
-
-    @Builder
-    public Chat(String topNote, String middleNote, String baseNote, MultipartFile image, User user) {
-        this.topNote = topNote;
-        this.middleNote = middleNote;
-        this.baseNote = baseNote;
-        this.image = image;
-        this.user = user;
-    }
 }
