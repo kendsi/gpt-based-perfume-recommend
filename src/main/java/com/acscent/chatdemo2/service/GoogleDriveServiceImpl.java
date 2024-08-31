@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.acscent.chatdemo2.dto.ChatRequestDTO;
 import com.acscent.chatdemo2.exceptions.GoogleApiException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -34,6 +35,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
@@ -77,17 +80,29 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
         return credential;
     }
 
+    @Override
     @Async
-    public CompletableFuture<Void> uploadImage(MultipartFile image) {
+    public CompletableFuture<Void> uploadImage(ChatRequestDTO chatRequest) {
         Path tempFile = null;
         try {
+            MultipartFile image = chatRequest.getImage();
+            String userName = chatRequest.getName();
+            String fileExtension = image.getOriginalFilename();
+            if (fileExtension != null && fileExtension.contains(".")) {
+                // 마지막 점(.) 이후의 문자열을 추출하여 확장자로 사용
+                fileExtension = fileExtension.substring(fileExtension.lastIndexOf("."));
+            }
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
+            String formattedDateTime = LocalDateTime.now().format(formatter);
+
             // 임시 파일 생성
             tempFile = Files.createTempFile("upload-", ".tmp");
             Files.copy(new BufferedInputStream(image.getInputStream()), tempFile, StandardCopyOption.REPLACE_EXISTING);
 
             // Google Drive에 업로드
             File fileMetadata = new File();
-            fileMetadata.setName(image.getOriginalFilename());
+            fileMetadata.setName(formattedDateTime + fileExtension + "-" + userName);
             fileMetadata.setParents(Collections.singletonList("1FHpi3xOpPdW5eEQVIH1qFDM4HO5By9mY"));
 
             FileContent mediaContent = new FileContent(image.getContentType(), tempFile.toFile());
@@ -98,7 +113,6 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
 
             log.info("File ID: " + file.getId());
 
-            return CompletableFuture.completedFuture(null);
         } catch (IOException e) {
             throw new GoogleApiException("Failed to upload image to Google Drive", e);
         } finally {
@@ -110,5 +124,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
                 }
             }
         }
+
+        return CompletableFuture.completedFuture(null);
     }
 }

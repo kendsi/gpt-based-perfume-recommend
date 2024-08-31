@@ -6,5 +6,5 @@ import com.acscent.chatdemo2.dto.ChatResponseDTO;
 import java.util.concurrent.CompletableFuture;
 
 public interface ChatService {
-    CompletableFuture<ChatResponseDTO> createPerfume(ChatRequestDTO chatData);
+    CompletableFuture<ChatResponseDTO> createPerfume(ChatRequestDTO chatRequest);
 }

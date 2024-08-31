@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.acscent.chatdemo2.dto.GptRequestDTO;
@@ -14,10 +15,12 @@ import com.acscent.chatdemo2.dto.GptResponseDTO;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GptServiceImpl implements GptService {
@@ -43,18 +46,26 @@ public class GptServiceImpl implements GptService {
 
         HttpEntity<GptRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
 
-        GptResponseDTO response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                requestEntity,
-                GptResponseDTO.class
-        ).getBody();
+        log.info("Sending GPT Request: {}", requestDTO);
 
-        if (response != null && !response.getChoices().isEmpty()) {
-            String result = response.getChoices().get(0).getMessage().getContent().trim();
-            return CompletableFuture.completedFuture(result);
-        } else {
-            return CompletableFuture.completedFuture("");
+        try {
+            GptResponseDTO response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    GptResponseDTO.class
+            ).getBody();
+
+            if (response != null && !response.getChoices().isEmpty()) {
+                String result = response.getChoices().get(0).getMessage().getContent().trim();
+                log.info(result);
+                return CompletableFuture.completedFuture(result);
+            } else {
+                return CompletableFuture.completedFuture("");
+            }
+        } catch (HttpClientErrorException e) {
+            log.error("Error response from GPT: {}", e.getResponseBodyAsString());
+            throw e;
         }
     }
 }
