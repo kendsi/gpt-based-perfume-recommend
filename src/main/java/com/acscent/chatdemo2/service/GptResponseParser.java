@@ -26,7 +26,7 @@ public class GptResponseParser {
     public ChatResponseDTO parseGptResponse(String content) {
         String insights = extractAllPatterns(INSIGHTS_PATTERN, content)
                              .stream()
-                             .collect(Collectors.joining(""));
+                             .collect(Collectors.joining(" "));
         String topNote = extractPattern(TOP_NOTE_PATTERN, content, true).trim();
         String middleNote = extractPattern(MIDDLE_NOTE_PATTERN, content, true).trim();
         String baseNote = extractPattern(BASE_NOTE_PATTERN, content, true).trim();

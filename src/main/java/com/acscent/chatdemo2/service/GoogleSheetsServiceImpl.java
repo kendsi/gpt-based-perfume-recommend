@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.acscent.chatdemo2.dto.ChatRequestDTO;
 import com.acscent.chatdemo2.dto.ChatResponseDTO;
+import com.acscent.chatdemo2.exceptions.CodeAlreadyUsedException;
 import com.acscent.chatdemo2.exceptions.GoogleApiException;
 import com.acscent.chatdemo2.exceptions.SheetsValueException;
 import com.google.api.client.auth.oauth2.Credential;
@@ -79,54 +80,66 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Async
-    public CompletableFuture<String> findByCode(String code) {
+    public CompletableFuture<String> verifyCode(String code) {
         String spreadsheetId = "1I_g1hf-1Ghnp2C2HqV9G5ECszYNfpVPnqOr56HAmMyw";
         String range = "sheet1!A1:C";
-
+    
         try {
             // Google Sheets에서 데이터를 가져오는 동기 작업
             ValueRange response = sheetService.spreadsheets().values()
                     .get(spreadsheetId, range)
                     .execute();
             List<List<Object>> values = response.getValues();
-
+    
             if (values == null || values.isEmpty()) {
                 throw new SheetsValueException("No data found in sheets: " + spreadsheetId);
             }
-
-            int serialNumberColumnIndex = -1;
-            List<Object> headerRow = values.get(0);  // 첫 번째 행
-
-            // "일련번호" 열의 인덱스를 찾습니다.
-            for (int i = 0; i < headerRow.size(); i++) {
-                if (headerRow.get(i).equals("일련번호")) {
-                    serialNumberColumnIndex = i;
-                    break;
-                }
-            }
-
-            if (serialNumberColumnIndex == -1) {
-                throw new SheetsValueException("'일련번호' 열을 찾을 수 없습니다.");
-            }
-
+    
+            // 'C'열의 인덱스는 2로 고정 ('A'는 0, 'B'는 1, 'C'는 2)
+            int codeColumnIndex = 1; // 'B'열 인덱스 (코드가 있는 열)
+            int flagColumnIndex = 2; // 'C'열 인덱스 (TRUE/FALSE 값이 있는 열)
+    
             // 데이터를 찾아 코드가 일치하는 행을 검색합니다.
-            for (List<Object> row : values.subList(1, values.size())) {  // 첫 번째 행 이후부터 탐색
-                if (row.size() > serialNumberColumnIndex && code.equals(row.get(serialNumberColumnIndex))) {
-                    if (row.size() > serialNumberColumnIndex + 1) {
-                        log.info("Found value in '일련번호' column: " + row.get(serialNumberColumnIndex));
-                        log.info("Corresponding value in next column: " + row.get(serialNumberColumnIndex + 1));
-                        return CompletableFuture.completedFuture(row.get(serialNumberColumnIndex + 1).toString());
+            for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {  // 첫 번째 행 이후부터 탐색
+                List<Object> row = values.get(rowIndex);
+                if (row.size() > codeColumnIndex && code.equals(row.get(codeColumnIndex))) {
+                    if (row.size() > flagColumnIndex) {
+                        String currentValue = row.get(flagColumnIndex).toString();
+                        log.info("Found value in '일련번호' column: " + row.get(codeColumnIndex));
+                        log.info("Corresponding value in 'C' column: " + currentValue);
+    
+                        // 값이 TRUE면 FALSE로 업데이트, FALSE면 예외 던지기
+                        if ("TRUE".equalsIgnoreCase(currentValue)) {
+                            // 'C'열의 셀 값을 업데이트하는 메서드 호출
+                            String cellRange = String.format("sheet1!C%d", rowIndex + 1); // 'C'열의 특정 행
+                            updateCellValue(spreadsheetId, cellRange, "FALSE"); // updateCellValue 메서드를 사용하여 값 업데이트
+                            return CompletableFuture.completedFuture("TRUE");
+                        } else {
+                            throw new CodeAlreadyUsedException(code);
+                        }
                     } else {
-                        log.info("Found value in '일련번호' column: " + row.get(serialNumberColumnIndex));
-                        throw new SheetsValueException("No corresponding value in the next column.");
+                        log.info("Found value in '일련번호' column: " + row.get(codeColumnIndex));
+                        throw new SheetsValueException("No corresponding value in the 'C' column.");
                     }
                 }
             }
-
+    
             throw new SheetsValueException("Code not found: " + code);
         } catch (IOException e) {
             throw new GoogleApiException("Could not access to the sheets: " + spreadsheetId, e);
         }
+    }
+
+    private void updateCellValue(String spreadsheetId, String cellRange, Object newValue) throws IOException {
+        List<List<Object>> values = List.of(List.of(newValue)); // 셀에 저장할 데이터 구조 만들기
+        ValueRange body = new ValueRange().setValues(values);
+
+        sheetService.spreadsheets().values()
+                .update(spreadsheetId, cellRange, body)
+                .setValueInputOption("RAW")
+                .execute();
+
+        log.info("Updated cell at {} to '{}'", cellRange, newValue);
     }
 
     @Override
@@ -170,7 +183,6 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         }
     }
 
-
     private List<String> filterDataByNoteType(List<List<Object>> values, String noteType) {
         // 해당 노트 유형의 데이터만 필터링
         List<List<Object>> noteData = values.stream()
@@ -190,21 +202,19 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             // 최소 count 값보다 3 작은 데이터만 필터링하고, 포맷팅하여 결과에 추가
             noteData.stream()
                     .filter(row -> Integer.parseInt(row.get(2).toString()) < threshold)  // 여기에서 필터링 조건을 수정
-                    .forEach(row -> formattedPrompts.add(formatPrompts(row)));
+                    .forEach(row -> formattedPrompts.add(formatNotePrompts(row)));
         }
     
         return formattedPrompts;
     }
 
-    private String formatPrompts(List<Object> row) {
+    private String formatNotePrompts(List<Object> row) {
         String name = row.get(1).toString(); // NAME
         String description = row.get(3).toString(); // DESCRIPTION
         String recommendation = row.get(4).toString(); // RECOMMENDATION
     
         return String.format("%s\n향 묘사: %s\n추천 문구: %s\n\n", name, description, recommendation);
     }
-
-
 
     @Override
     @Async
@@ -229,7 +239,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                 if (selectedNote.equals(row.get(1).toString())) { // 노트 이름 검색
                     int currentCount = Integer.parseInt(row.get(2).toString()); // 해당 노트의 현재 COUNT 값 저장
                     String cellRange = String.format("sheet1!C%d", i + 2); // 해당 노트의 COUNT 값 위치(인덱스) 저장
-                    updateSheetCount(cellRange, currentCount + 1);
+                    updateCellValue(spreadsheetId, cellRange, currentCount + 1); // updateCellValue 메서드를 사용하여 값 업데이트
                     isUpdated = true;
                     break;
                 }
@@ -246,20 +256,6 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         return CompletableFuture.completedFuture(null);
     }
 
-    private void updateSheetCount(String cellRange, int newValue) throws IOException {
-        String spreadsheetId = "185ekvjK6jSP_uFw9y_v6fEzNRZf8dSIM8YwQu7AplOo";
-
-        List<List<Object>> values = List.of(List.of(newValue)); // 셀에 저장할 데이터 구조 만들기
-        ValueRange body = new ValueRange().setValues(values);
-
-        sheetService.spreadsheets().values()
-                .update(spreadsheetId, cellRange, body)
-                .setValueInputOption("RAW")
-                .execute();
-    }
-
-
-
     @Override
     @Async
     public CompletableFuture<Void> saveChatResponse(ChatResponseDTO chatResponse, ChatRequestDTO chatRequest) {
@@ -271,26 +267,26 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         String perfumeName = chatResponse.getPerfumeName();
         String insights = chatResponse.getInsights();
 
-    // 추가할 데이터 행을 생성
-    List<Object> newRow = List.of(code, userName, perfumeName, insights);
+        // 추가할 데이터 행을 생성
+        List<Object> newRow = List.of(code, userName, perfumeName, insights);
 
-    // ValueRange 객체를 생성하여 데이터를 설정
-    ValueRange body = new ValueRange().setValues(List.of(newRow));
+        // ValueRange 객체를 생성하여 데이터를 설정
+        ValueRange body = new ValueRange().setValues(List.of(newRow));
 
-    try {
-        // Google Sheets에 데이터를 추가
-        sheetService.spreadsheets().values()
-            .append(spreadsheetId, range, body)
-            .setValueInputOption("RAW") // 데이터를 그대로 추가
-            .execute();
+        try {
+            // Google Sheets에 데이터를 추가
+            sheetService.spreadsheets().values()
+                    .append(spreadsheetId, range, body)
+                    .setValueInputOption("RAW") // 데이터를 그대로 추가
+                    .execute();
 
-        log.info("Data saved successfully to Google Sheets.");
+            log.info("Data saved successfully to Google Sheets.");
 
-    } catch (IOException e) {
-        log.error("Failed to save data to Google Sheets.", e);
-        throw new GoogleApiException("Failed to save data to Google Sheets", e);
-    }
+        } catch (IOException e) {
+            log.error("Failed to save data to Google Sheets.", e);
+            throw new GoogleApiException("Failed to save data to Google Sheets", e);
+        }
 
-    return CompletableFuture.completedFuture(null);
+        return CompletableFuture.completedFuture(null);
     }
 }

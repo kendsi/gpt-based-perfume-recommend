@@ -53,7 +53,7 @@ public class ChatServiceImpl implements ChatService {
     public CompletableFuture<ChatResponseDTO> createPerfume(ChatRequestDTO chatRequest) {
         try {
             // Google Sheets에서 코드 확인
-            CompletableFuture<String> findByCodeFuture = verifyCode(chatRequest.getCode());
+            CompletableFuture<String> findByCodeFuture = googleSheetsService.verifyCode(chatRequest.getCode());
 
             // 비동기적으로 이미지 업로드 실행
             CompletableFuture<Void> uploadImageFuture = googleDriveService.uploadImage(chatRequest);
@@ -86,17 +86,6 @@ public class ChatServiceImpl implements ChatService {
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
-    }
-
-    @Async
-    private CompletableFuture<String> verifyCode(String code) {
-        return googleSheetsService.findByCode(code)
-            .thenApplyAsync(result -> {
-                if ("FALSE".equals(result)) {
-                    throw new CodeAlreadyUsedException(code);
-                }
-                return result;
-            });
     }
 
     @Async
