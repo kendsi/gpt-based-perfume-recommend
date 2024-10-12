@@ -6,29 +6,23 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.acscent.chatdemo2.dto.ChatRequestDTO;
 import com.acscent.chatdemo2.exceptions.GoogleApiException;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -44,9 +38,9 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
 
     private static final String APPLICATION_NAME = "perfume-maker";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final String GOOGLE_ACCOUNT_PATH = "/perfume-maker-google.json";
+
     private static final List<String> DRIVE_SCOPES = Collections.singletonList(DriveScopes.DRIVE);
-    private static final String GOOGLE_ACCOUNT_PATH = "/credentials.json";
     
     private Drive driveService;
 
@@ -54,7 +48,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
     private void initDrive() {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            driveService = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getDriveCredentials(HTTP_TRANSPORT))
+            driveService = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpCredentialsAdapter(getDriveCredentials()))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         } catch (Exception e) {
@@ -62,22 +56,14 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
         }
     }
 
-    private Credential getDriveCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        InputStream in = GoogleDriveService.class.getResourceAsStream(GOOGLE_ACCOUNT_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + GOOGLE_ACCOUNT_PATH);
-        }
-        GoogleClientSecrets clientSecrets =
-            GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+    private GoogleCredentials getDriveCredentials() throws IOException {
+        // GoogleCredentials를 사용하여 서비스 계정 자격 증명 로드
+        InputStream serviceAccountStream = GoogleDriveService.class.getResourceAsStream(GOOGLE_ACCOUNT_PATH);
 
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-            HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, DRIVE_SCOPES)
-            .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-            .setAccessType("offline")
-            .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-        return credential;
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream)
+                .createScoped(DRIVE_SCOPES);
+
+        return credentials;
     }
 
     @Override
@@ -103,7 +89,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
             // Google Drive에 업로드
             File fileMetadata = new File();
             fileMetadata.setName(formattedDateTime + fileExtension + "-" + userName);
-            fileMetadata.setParents(Collections.singletonList("1FHpi3xOpPdW5eEQVIH1qFDM4HO5By9mY"));
+            fileMetadata.setParents(Collections.singletonList("1r03AYNA4QF3_60B8FjA1FuKV_34dCwI8"));
 
             FileContent mediaContent = new FileContent(image.getContentType(), tempFile.toFile());
 

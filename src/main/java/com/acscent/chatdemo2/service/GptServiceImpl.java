@@ -39,8 +39,9 @@ public class GptServiceImpl implements GptService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
+        // model: "gpt-4-turbo-2024-04-09",
         GptRequestDTO requestDTO = GptRequestDTO.builder()
-                .model("gpt-4o")
+                .model("chatgpt-4o-latest")
                 .messages(prompt)
                 .build();
 

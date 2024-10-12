@@ -5,30 +5,25 @@ import org.springframework.stereotype.Service;
 
 import com.acscent.chatdemo2.dto.ChatRequestDTO;
 import com.acscent.chatdemo2.dto.ChatResponseDTO;
+import com.acscent.chatdemo2.dto.PassCodeResponseDTO;
 import com.acscent.chatdemo2.exceptions.CodeAlreadyUsedException;
 import com.acscent.chatdemo2.exceptions.GoogleApiException;
 import com.acscent.chatdemo2.exceptions.SheetsValueException;
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -42,9 +37,9 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     private static final String APPLICATION_NAME = "perfume-maker";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final String GOOGLE_ACCOUNT_PATH = "/perfume-maker-google.json";
+
     private static final List<String> SHEET_SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
-    private static final String GOOGLE_ACCOUNT_PATH = "/credentials.json";
     
     private Sheets sheetService;
 
@@ -52,7 +47,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     private void initSheets() {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            sheetService = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getSheetCredentials(HTTP_TRANSPORT))
+            sheetService = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpCredentialsAdapter(getSheetCredentials()))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         } catch (Exception e) {
@@ -60,28 +55,20 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
         }
     }
 
-    private Credential getSheetCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        InputStream in = GoogleSheetsServiceImpl.class.getResourceAsStream(GOOGLE_ACCOUNT_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + GOOGLE_ACCOUNT_PATH);
-        }
-        GoogleClientSecrets clientSecrets =
-            GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+    private GoogleCredentials getSheetCredentials() throws IOException {
+        // GoogleCredentials를 사용하여 서비스 계정 자격 증명 로드
+        InputStream serviceAccountStream = GoogleSheetsService.class.getResourceAsStream(GOOGLE_ACCOUNT_PATH);
 
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-            HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SHEET_SCOPES)
-            .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-            .setAccessType("offline")
-            .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-        return credential;
+        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccountStream)
+                .createScoped(SHEET_SCOPES);
+
+        return credentials;
     }
 
     @Override
     @Async
-    public CompletableFuture<String> verifyCode(String code) {
-        String spreadsheetId = "1I_g1hf-1Ghnp2C2HqV9G5ECszYNfpVPnqOr56HAmMyw";
+    public CompletableFuture<PassCodeResponseDTO> verifyCode(String code) {
+        String spreadsheetId = "1XQF7kn7GCjcKj6PXq-O-kUPPBOKGLqdnfxWeNyG_QAY";
         String range = "sheet1!A1:C";
     
         try {
@@ -102,9 +89,11 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
             // 데이터를 찾아 코드가 일치하는 행을 검색합니다.
             for (int rowIndex = 1; rowIndex < values.size(); rowIndex++) {  // 첫 번째 행 이후부터 탐색
                 List<Object> row = values.get(rowIndex);
+
                 if (row.size() > codeColumnIndex && code.equals(row.get(codeColumnIndex))) {
                     if (row.size() > flagColumnIndex) {
                         String currentValue = row.get(flagColumnIndex).toString();
+
                         log.info("Found value in '일련번호' column: " + row.get(codeColumnIndex));
                         log.info("Corresponding value in 'C' column: " + currentValue);
     
@@ -113,7 +102,9 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                             // 'C'열의 셀 값을 업데이트하는 메서드 호출
                             String cellRange = String.format("sheet1!C%d", rowIndex + 1); // 'C'열의 특정 행
                             updateCellValue(spreadsheetId, cellRange, "FALSE"); // updateCellValue 메서드를 사용하여 값 업데이트
-                            return CompletableFuture.completedFuture("TRUE");
+                            
+                            PassCodeResponseDTO responseDTO = new PassCodeResponseDTO("validated", code);
+                            return CompletableFuture.completedFuture(responseDTO);
                         } else {
                             throw new CodeAlreadyUsedException(code);
                         }
@@ -145,7 +136,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Override
     @Async
     public CompletableFuture<String> getNotesPrompt() {
-        String spreadsheetId = "185ekvjK6jSP_uFw9y_v6fEzNRZf8dSIM8YwQu7AplOo";
+        String spreadsheetId = "16u6I7Uk0TMzhsJkbXkvFD6GI71y4uAwVhnVS7sIcm3E";
         String range = "sheet1!A2:E31";
 
         try {
@@ -219,7 +210,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Override
     @Async
     public CompletableFuture<Void> updateCount(String selectedNote) {
-        String spreadsheetId = "185ekvjK6jSP_uFw9y_v6fEzNRZf8dSIM8YwQu7AplOo";
+        String spreadsheetId = "16u6I7Uk0TMzhsJkbXkvFD6GI71y4uAwVhnVS7sIcm3E";
         String range = "sheet1!A2:E31";
 
         try {
@@ -259,16 +250,19 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
     @Override
     @Async
     public CompletableFuture<Void> saveChatResponse(ChatResponseDTO chatResponse, ChatRequestDTO chatRequest) {
-        String spreadsheetId = "1iMLvUNs_mDDOcBQQdhtF4WDSDEK6ZGHJJGDMAtc2C3Y";
+        String spreadsheetId = "1D8n8faBvrYjX3Yk-6-voGoS0YUgN37bi7yEkKfk24Ws";
         String range = "sheet1!A:E";
 
         String code = chatRequest.getCode();
         String userName = chatRequest.getName();
         String perfumeName = chatResponse.getPerfumeName();
         String insights = chatResponse.getInsights();
+        String topNote = chatResponse.getTopNote();
+        String middleNote = chatResponse.getMiddleNote();
+        String baseNote = chatResponse.getBaseNote();
 
         // 추가할 데이터 행을 생성
-        List<Object> newRow = List.of(code, userName, perfumeName, insights);
+        List<Object> newRow = List.of(code, userName, perfumeName, insights, topNote, middleNote, baseNote);
 
         // ValueRange 객체를 생성하여 데이터를 설정
         ValueRange body = new ValueRange().setValues(List.of(newRow));

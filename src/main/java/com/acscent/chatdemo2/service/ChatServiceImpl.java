@@ -10,7 +10,6 @@ import com.acscent.chatdemo2.dto.ChatRequestDTO;
 import com.acscent.chatdemo2.dto.ChatResponseDTO;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Content;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
-import com.acscent.chatdemo2.exceptions.CodeAlreadyUsedException;
 import com.acscent.chatdemo2.exceptions.InvalidLanguageInputException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,11 +51,6 @@ public class ChatServiceImpl implements ChatService {
     @Async
     public CompletableFuture<ChatResponseDTO> createPerfume(ChatRequestDTO chatRequest) {
         try {
-            // Google Sheets에서 코드 확인
-            CompletableFuture<String> findByCodeFuture = googleSheetsService.verifyCode(chatRequest.getCode());
-
-            // 비동기적으로 이미지 업로드 실행
-            CompletableFuture<Void> uploadImageFuture = googleDriveService.uploadImage(chatRequest);
 
             // Google Sheets에서 notesPrompt 데이터를 비동기적으로 가져옴
             CompletableFuture<String> notesPromptFuture = googleSheetsService.getNotesPrompt();
@@ -65,23 +59,25 @@ public class ChatServiceImpl implements ChatService {
             List<Message> prompt = loadPrompt(chatRequest.getLanguage());
 
             // 모든 비동기 작업 완료 후 GPT 요청을 비동기적으로 처리
-            return CompletableFuture.allOf(findByCodeFuture, uploadImageFuture, notesPromptFuture)
-                .thenComposeAsync(v -> notesPromptFuture.thenComposeAsync(notesPrompt -> gptRequest(chatRequest, prompt, notesPrompt)))
-                    .thenComposeAsync(chatResponse -> {
-                        // GPT 응답에서 선택된 노트를 추출
-                        List<String> selectedNotes = extractSelectedNotes(chatResponse);
+            return notesPromptFuture.thenComposeAsync(v -> notesPromptFuture.thenComposeAsync(notesPrompt -> gptRequest(chatRequest, prompt, notesPrompt)))
+                .thenComposeAsync(chatResponse -> {
+                    // GPT 응답에서 선택된 노트를 추출
+                    List<String> selectedNotes = extractSelectedNotes(chatResponse);
 
-                        // 선택된 노트들의 count를 업데이트하는 비동기 작업 실행
-                        CompletableFuture<Void> updateCountFuture = updateNoteCounts(selectedNotes);
+                    // 선택된 노트들의 count를 업데이트하는 비동기 작업 실행
+                    CompletableFuture<Void> updateCountFuture = updateNoteCounts(selectedNotes);
 
-                        // GPT 응답 결과를 저장하는 비동기 작업 실행
-                        CompletableFuture<Void> saveResponseFuture = googleSheetsService.saveChatResponse(chatResponse, chatRequest);
+                    // GPT 응답 결과를 저장하는 비동기 작업 실행
+                    CompletableFuture<Void> saveResponseFuture = googleSheetsService.saveChatResponse(chatResponse, chatRequest);
 
-                        // 모든 작업이 완료되면 최종 응답 반환
-                        return CompletableFuture.allOf(updateCountFuture, saveResponseFuture)
-                                .thenApplyAsync(v -> chatResponse);
-                    }
-                );
+                    // 구글 드라이브에 이미지를 저장하는 비동기 작업 실행
+                    CompletableFuture<Void> uploadImageFuture = googleDriveService.uploadImage(chatRequest);
+
+                    // 모든 작업이 완료되면 최종 응답 반환
+                    return CompletableFuture.allOf(updateCountFuture, saveResponseFuture, uploadImageFuture)
+                            .thenApplyAsync(v -> chatResponse);
+                }
+            );
 
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);

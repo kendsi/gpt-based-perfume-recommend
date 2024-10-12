@@ -7,19 +7,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-
-@Getter
-@Setter
+@Data
 @Builder
 public class GptRequestDTO {
     private String model;
     private List<Message> messages;
 
-    @Getter
-    @Setter
+    @Data
     public static class Message {
         private String role;
         private Object content;
@@ -47,8 +43,7 @@ public class GptRequestDTO {
         }
     }
 
-    @Getter
-    @Setter
+    @Data
     public static class Content {
         private String type;
 
@@ -61,8 +56,7 @@ public class GptRequestDTO {
 
         public Content() {}
 
-        @Getter
-        @Setter
+        @Data
         public static class ImageUrl {
             private String url;
         }
