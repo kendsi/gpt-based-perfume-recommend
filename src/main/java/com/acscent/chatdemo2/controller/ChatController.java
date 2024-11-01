@@ -3,12 +3,12 @@ package com.acscent.chatdemo2.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.acscent.chatdemo2.dto.ChatRequestDTO;
-import com.acscent.chatdemo2.dto.ChatResponseDTO;
-import com.acscent.chatdemo2.dto.PassCodeRequestDTO;
-import com.acscent.chatdemo2.dto.PassCodeResponseDTO;
-import com.acscent.chatdemo2.service.ChatService;
-import com.acscent.chatdemo2.service.GoogleSheetsService;
+import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
+import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
+import com.acscent.chatdemo2.dto.UserCodeRequestDTO;
+import com.acscent.chatdemo2.dto.UserCodeResponseDTO;
+import com.acscent.chatdemo2.service.PerfumeService;
+import com.acscent.chatdemo2.service.UserCodeService;
 import com.acscent.chatdemo2.service.ImWebService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,27 +33,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api")
 public class ChatController {
 
-    private final ChatService chatService;
-    private final GoogleSheetsService googleSheetsService;
+    private final PerfumeService perfumeService;
+    private final UserCodeService userCodeService;
     private final ImWebService imWebService;
 
     @PostMapping("/passcode")
-    public CompletableFuture<ResponseEntity<PassCodeResponseDTO>> verifyPassCode(@RequestBody PassCodeRequestDTO passCodeRequestDTO) {
-        if (passCodeRequestDTO.getCode().equals("") || passCodeRequestDTO.getCode() == null) {
+    public ResponseEntity<UserCodeResponseDTO> verifyPassCode(@RequestBody UserCodeRequestDTO userCodeRequestDTO) {
+        String code = userCodeRequestDTO.getCode();
+        if (code.equals("") || code == null) {
             throw new IllegalArgumentException("Please Enter Code");
         }
-        return googleSheetsService.verifyCode(passCodeRequestDTO.getCode())
-                .thenApply(response -> new ResponseEntity<>(response, HttpStatus.OK));
+        return new ResponseEntity<>(userCodeService.verifyCode(code), HttpStatus.OK);
     }
     
     
     @PostMapping("/image")
-    public CompletableFuture<ResponseEntity<ChatResponseDTO>> createPerfume(@ModelAttribute ChatRequestDTO chatData) {
-        if (chatData.getImage() == null || chatData.getImage().isEmpty()) {
+    public ResponseEntity<PerfumeResponseDTO> createPerfume(@ModelAttribute PerfumeRequestDTO perfumeDto) {
+        if (perfumeDto.getImage() == null || perfumeDto.getImage().isEmpty()) {
             throw new IllegalArgumentException("Image data is required.");
         }
-        return chatService.createPerfume(chatData)
-                .thenApply(response -> new ResponseEntity<>(response, HttpStatus.OK));
+        PerfumeResponseDTO perfume = perfumeService.createPerfume(perfumeDto);
+
+        return new ResponseEntity<>(perfume, HttpStatus.OK);
     }
 
     @GetMapping("/products")

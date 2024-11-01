@@ -4,7 +4,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.acscent.chatdemo2.dto.ChatRequestDTO;
+import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
 import com.acscent.chatdemo2.exceptions.GoogleApiException;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
@@ -68,7 +68,7 @@ public class GoogleDriveServiceImpl implements GoogleDriveService {
 
     @Override
     @Async
-    public CompletableFuture<Void> uploadImage(ChatRequestDTO chatRequest) {
+    public CompletableFuture<Void> uploadImage(PerfumeRequestDTO chatRequest) {
         Path tempFile = null;
         try {
             MultipartFile image = chatRequest.getImage();

@@ -24,6 +24,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(CodeNotFoundException.class)
+    public ResponseEntity<?> handleCodeNotFoundException(CodeNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(GptResponseParsingException.class)
     public ResponseEntity<?> handleGptResponseParsingException(GptResponseParsingException ex) {
         log.error(ex.getMessage(), ex);
@@ -36,8 +42,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(PromptFormattingException.class)
-    public ResponseEntity<String> handlePromptFormattingException(PromptFormattingException ex) {
+    @ExceptionHandler(ImageEncodingException.class)
+    public ResponseEntity<String> handleImageEncodingException(ImageEncodingException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(PromptLoadingException.class)
+    public ResponseEntity<String> handlePromptLoadingException(PromptLoadingException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -58,5 +70,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<String> handleInvalidLanguageInputException(InvalidLanguageInputException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoteNotFoundException.class)
+    public ResponseEntity<String> handleNoteNotFoundException(NoteNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ImageSavingException.class)
+    public ResponseEntity<String> handleImageSavingException(ImageSavingException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

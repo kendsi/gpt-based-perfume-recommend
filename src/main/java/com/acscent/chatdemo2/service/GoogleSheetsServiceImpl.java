@@ -3,9 +3,9 @@ package com.acscent.chatdemo2.service;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.acscent.chatdemo2.dto.ChatRequestDTO;
-import com.acscent.chatdemo2.dto.ChatResponseDTO;
-import com.acscent.chatdemo2.dto.PassCodeResponseDTO;
+import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
+import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
+import com.acscent.chatdemo2.dto.UserCodeResponseDTO;
 import com.acscent.chatdemo2.exceptions.CodeAlreadyUsedException;
 import com.acscent.chatdemo2.exceptions.GoogleApiException;
 import com.acscent.chatdemo2.exceptions.SheetsValueException;
@@ -67,7 +67,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Async
-    public CompletableFuture<PassCodeResponseDTO> verifyCode(String code) {
+    public CompletableFuture<UserCodeResponseDTO> verifyCode(String code) {
         String spreadsheetId = "1XQF7kn7GCjcKj6PXq-O-kUPPBOKGLqdnfxWeNyG_QAY";
         String range = "sheet1!A1:C";
     
@@ -103,7 +103,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
                             String cellRange = String.format("sheet1!C%d", rowIndex + 1); // 'C'열의 특정 행
                             updateCellValue(spreadsheetId, cellRange, "FALSE"); // updateCellValue 메서드를 사용하여 값 업데이트
                             
-                            PassCodeResponseDTO responseDTO = new PassCodeResponseDTO("validated", code);
+                            UserCodeResponseDTO responseDTO = new UserCodeResponseDTO("validated", code);
                             return CompletableFuture.completedFuture(responseDTO);
                         } else {
                             throw new CodeAlreadyUsedException(code);
@@ -249,7 +249,7 @@ public class GoogleSheetsServiceImpl implements GoogleSheetsService {
 
     @Override
     @Async
-    public CompletableFuture<Void> saveChatResponse(ChatResponseDTO chatResponse, ChatRequestDTO chatRequest) {
+    public CompletableFuture<Void> saveChatResponse(PerfumeResponseDTO chatResponse, PerfumeRequestDTO chatRequest) {
         String spreadsheetId = "1D8n8faBvrYjX3Yk-6-voGoS0YUgN37bi7yEkKfk24Ws";
         String range = "sheet1!A:E";
 

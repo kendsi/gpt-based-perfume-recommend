@@ -5,7 +5,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -31,8 +29,7 @@ public class GptServiceImpl implements GptService {
     private String apiKey;
 
     @Override
-    @Async
-    public CompletableFuture<String> requestToGpt(List<Message> prompt) {
+    public String requestToGpt(List<Message> prompt) {
         String url = "https://api.openai.com/v1/chat/completions";
 
         HttpHeaders headers = new HttpHeaders();
@@ -60,9 +57,9 @@ public class GptServiceImpl implements GptService {
             if (response != null && !response.getChoices().isEmpty()) {
                 String result = response.getChoices().get(0).getMessage().getContent().trim();
                 log.info(result);
-                return CompletableFuture.completedFuture(result);
+                return result;
             } else {
-                return CompletableFuture.completedFuture("");
+                return "";
             }
         } catch (HttpClientErrorException e) {
             log.error("Error response from GPT: {}", e.getResponseBodyAsString());

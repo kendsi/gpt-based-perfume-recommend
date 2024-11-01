@@ -6,8 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-
-public class ChatRequestDTO {
+public class PerfumeRequestDTO {
 
     private String name;
     private String gender;
@@ -15,10 +14,10 @@ public class ChatRequestDTO {
     private String code;
     private MultipartFile image;
 
-    public ChatRequestDTO() {}
+    public PerfumeRequestDTO() {}
 
     @Builder
-    public ChatRequestDTO(String name, String gender, String language, String code, MultipartFile image) {
+    public PerfumeRequestDTO(String name, String gender, String language, String code, MultipartFile image) {
         this.name = name;
         this.gender = gender;
         this.language = language;

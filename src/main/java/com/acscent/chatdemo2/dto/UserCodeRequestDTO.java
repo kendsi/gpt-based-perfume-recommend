@@ -3,12 +3,12 @@ package com.acscent.chatdemo2.dto;
 import lombok.Data;
 
 @Data
-public class PassCodeRequestDTO {
+public class UserCodeRequestDTO {
     private String code;
 
-    public PassCodeRequestDTO(String code) {
+    public UserCodeRequestDTO(String code) {
         this.code = code;
     }
 
-    public PassCodeRequestDTO() {}
+    public UserCodeRequestDTO() {}
 }

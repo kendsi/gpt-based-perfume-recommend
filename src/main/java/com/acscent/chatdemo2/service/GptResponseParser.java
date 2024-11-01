@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
-import com.acscent.chatdemo2.dto.ChatResponseDTO;
+import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
 import com.acscent.chatdemo2.exceptions.GptResponseParsingException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class GptResponseParser {
     private static final Pattern BASE_NOTE_PATTERN = Pattern.compile("BASE NOTE: (.*?)(?=\\n\\n|Perfume|$)", Pattern.DOTALL);
     private static final Pattern NAME_RECOMMENDATION_PATTERN = Pattern.compile("Recommendation: (.*?)(?=\\n\\n|checkcheck|$)", Pattern.DOTALL);
 
-    public ChatResponseDTO parseGptResponse(String content) {
+    public PerfumeResponseDTO parseGptResponse(String content) {
         String insights = extractAllPatterns(INSIGHTS_PATTERN, content)
                              .stream()
                              .collect(Collectors.joining(" "));
@@ -32,7 +32,7 @@ public class GptResponseParser {
         String baseNote = extractPattern(BASE_NOTE_PATTERN, content, true).trim();
         String nameRecommendation = extractPattern(NAME_RECOMMENDATION_PATTERN, content, true).trim();
 
-        return ChatResponseDTO.builder()
+        return PerfumeResponseDTO.builder()
                 .perfumeName(nameRecommendation)
                 .insights(insights)
                 .topNote(topNote)
