@@ -1,75 +1,65 @@
 package com.acscent.chatdemo2.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.acscent.chatdemo2.exceptions.NoteNotFoundException;
-import com.acscent.chatdemo2.model.Note;
-import com.acscent.chatdemo2.model.Note.NoteType;
-import com.acscent.chatdemo2.repository.NoteRepository;
+import com.acscent.chatdemo2.model.MainNote;
+import com.acscent.chatdemo2.repository.MainNoteRepository;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class NoteServiceImpl implements NoteService {
 
-    private final NoteRepository noteRepository;
+    private final MainNoteRepository mainNoteRepository;
 
     @Override
-    public String getFilteredNotesPrompt() {
-        // 필터링된 데이터 가져오기
-        List<Note> topNotes = noteRepository.findFilteredNotesByType(NoteType.TOP);
-        List<Note> middleNotes = noteRepository.findFilteredNotesByType(NoteType.MIDDLE);
-        List<Note> baseNotes = noteRepository.findFilteredNotesByType(NoteType.BASE);
+    public String getFilteredNotes(List<String> preferred, List<String> disliked) {
 
-        // 최종 결과 문자열 생성
-        StringBuilder resultBuilder = new StringBuilder();
+        List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked);
 
-        resultBuilder.append("Top Note 향 오일 리스트:\n");
-        topNotes.forEach(note -> resultBuilder.append(note.getName()).append("\n"));
+        if (filteredMainNotes.isEmpty() || filteredMainNotes == null) {
+            throw new NoteNotFoundException("No notes match the specified criteria.");
+        }
 
-        resultBuilder.append("\nMiddle Note 향 오일 리스트:\n");
-        middleNotes.forEach(note -> resultBuilder.append(note.getName()).append("\n"));
+        // StringBuilder를 사용해 문자열을 생성
+        StringBuilder result = new StringBuilder("현재 추천 가능한 향수 리스트:\n");
+        filteredMainNotes.forEach(note -> {
+            result
+                .append("Perfume: ")
+                .append(note.getPerfumeName())
+                .append("\n    Top Note: ")
+                .append(note.getName())
+                .append(", Top Note Description: ")
+                .append(note.getScent())
+                .append("\n    Middle Note: ")
+                .append(note.getMiddleNote().getName())
+                .append(", Middle Note Description: ")
+                .append(note.getMiddleNote().getScent())
+                .append("\n    Base Note: ")
+                .append(note.getBaseNote().getName())
+                .append(", Base Note Description: ")
+                .append(note.getBaseNote().getScent())
+                .append("\n    Perfume Description: ")
+                .append(note.getDescription())
+                .append("\n    Recommendation: ")
+                .append(note.getRecommendation())
+                .append("\n\n");
+        });
 
-        resultBuilder.append("\nBase Note 향 오일 리스트:\n");
-        baseNotes.forEach(note -> resultBuilder.append(note.getName()).append("\n"));
-
-        return resultBuilder.toString();
+        // 최종 문자열 반환
+        return result.toString();
     }
 
     @Override
-    @Transactional
-    public List<Long> updateNoteCount(List<String> selectedNotes) {
-        List<Long> updatedNoteIds = new ArrayList<>();
+    public MainNote getSelectedNote(String noteName) {
 
-        for (int i = 0; i < selectedNotes.size(); i++) {
-            String noteName = selectedNotes.get(i);
-            Note note;
-            switch (i) {
-                case 0: // Top Note
-                    note = noteRepository.findNoteByName(noteName, NoteType.TOP)
-                            .orElseThrow(() -> new NoteNotFoundException("Top Note not found: " + noteName));
-                    noteRepository.updateNoteCount(note.getId(), NoteType.TOP);
-                    break;
-                case 1: // Middle Note
-                    note = noteRepository.findNoteByName(noteName, NoteType.MIDDLE)
-                            .orElseThrow(() -> new NoteNotFoundException("Middle Note not found: " + noteName));
-                    noteRepository.updateNoteCount(note.getId(), NoteType.MIDDLE);
-                    break;
-                case 2: // Base Note
-                    note = noteRepository.findNoteByName(noteName, NoteType.BASE)
-                            .orElseThrow(() -> new NoteNotFoundException("Base Note not found: " + noteName));
-                    noteRepository.updateNoteCount(note.getId(), NoteType.BASE);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid note type index: " + i);
-            }
-            updatedNoteIds.add(note.getId());
-        }
-        return updatedNoteIds;
+        MainNote selectedNote = mainNoteRepository.findByName(noteName)
+                            .orElseThrow(() -> new NoteNotFoundException("Note not found with name: " + noteName));
+
+        return selectedNote;
     }
 }

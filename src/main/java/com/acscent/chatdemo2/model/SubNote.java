@@ -1,26 +1,30 @@
 package com.acscent.chatdemo2.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "user_code")
-public class UserCode {
+@Table(name = "sub_note")
+public class SubNote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String code;
+    private String name;
+    private String scent;
 
-    @Column(nullable = false)
-    private boolean isEnabled;
+    public SubNote() {}
 
-    public UserCode() {}
+    @Builder
+    public SubNote(Long id, String name, String scent) {
+        this.id = id;
+        this.name = name;
+        this.scent = scent;
+    }
 }

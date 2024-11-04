@@ -5,6 +5,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.acscent.chatdemo2.data.Appearance;
+import com.acscent.chatdemo2.data.ParsedGptResponse;
 import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
 import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Content;
@@ -13,6 +15,7 @@ import com.acscent.chatdemo2.exceptions.InvalidLanguageInputException;
 import com.acscent.chatdemo2.exceptions.ImageEncodingException;
 import com.acscent.chatdemo2.exceptions.ImageSavingException;
 import com.acscent.chatdemo2.exceptions.PromptLoadingException;
+import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.model.Perfume;
 import com.acscent.chatdemo2.repository.PerfumeRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -26,7 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import java.io.File;
 
@@ -37,8 +40,6 @@ public class PerfumeServiceImpl implements PerfumeService {
 
     private final GptService gptService;
     private final GptResponseParser gptResponseParser;
-    // private final GoogleDriveService googleDriveService;
-    // private final GoogleSheetsService googleSheetsService;
     private final NoteService noteService;
     private final PerfumeRepository perfumeRepository;
     private final ObjectMapper objectMapper;
@@ -58,37 +59,42 @@ public class PerfumeServiceImpl implements PerfumeService {
     @Override
     public PerfumeResponseDTO createPerfume(PerfumeRequestDTO perfumeRequest) {
 
+        log.info("Language: " + perfumeRequest.getLanguage());
         List<Message> prompt = loadPrompt(perfumeRequest.getLanguage());
-        String notePrompt = noteService.getFilteredNotesPrompt();
-        List<Message> formattedPrompt = formatPrompt(perfumeRequest, prompt, notePrompt);
-
+        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreferred(), perfumeRequest.getDisliked());
         log.info(notePrompt);
 
-        PerfumeResponseDTO chatResponse = gptResponseParser.parseGptResponse(gptService.requestToGpt(formattedPrompt));
-        log.info(chatResponse.getTopNote() + chatResponse.getMiddleNote() + chatResponse.getBaseNote());
-        List<String> selectedNotes = extractSelectedNotes(chatResponse);
-        List<Long> noteIds = noteService.updateNoteCount(selectedNotes);
+        List<Message> formattedPrompt = formatPrompt(perfumeRequest, prompt, notePrompt);
+
+        ParsedGptResponse parsedGptResponse = gptResponseParser.parseGptResponse(gptService.requestToGpt(formattedPrompt));
+
+        log.info("RECOMMENDED PERFUME: " + parsedGptResponse.getPerfumeName());
+
+        log.info("APPEARANCE ANALYSIS");
+        log.info("FACIAL FEATURE: " + parsedGptResponse.getAppearance().getFacialFeature());
+        log.info("STYLE: " + parsedGptResponse.getAppearance().getStyle());
+        log.info("VIBE: " + parsedGptResponse.getAppearance().getVibe());
+
+        log.info("NOTES");
+        log.info("TOP NOTE: " + parsedGptResponse.getTopNote());
+        log.info("MIDDLE NOTE: " + parsedGptResponse.getMiddleNote());
+        log.info("BASE NOTE: " + parsedGptResponse.getBaseNote());
+
+        log.info("PROFILE");
+        log.info(parsedGptResponse.getProfile());
 
         String imageName = saveImage(perfumeRequest.getImage(), perfumeRequest.getName());
+        Perfume newPerfume = perfumeRepository.save(convertToModel(perfumeRequest, parsedGptResponse, imageName));
 
-        Perfume perfume = Perfume.builder()
-                        .code(perfumeRequest.getCode())
-                        .userName(perfumeRequest.getName())
-                        .perfumeName(chatResponse.getPerfumeName())
-                        .insights(chatResponse.getInsights())
-                        .topNoteId(noteIds.get(0))
-                        .middleNoteId(noteIds.get(1))
-                        .baseNoteId(noteIds.get(2))
-                        .imageName(imageName)
-                        .build();
+        return convertToDto(newPerfume);
+    }
 
-        Perfume newPerfume = perfumeRepository.save(perfume);
-
-        chatResponse.setId(newPerfume.getId());
-        chatResponse.setUserName(perfumeRequest.getName());
-        chatResponse.setImageName(imageName);
-
-        return chatResponse;
+    @Override
+    public List<PerfumeResponseDTO> getAllPerfumeResults() {
+        List<Perfume> perfumeList = perfumeRepository.findAll();
+        return perfumeList.stream()
+                        .map(this::convertToDto)
+                        .collect(Collectors.toList());
     }
 
     private List<Message> loadPrompt(String language) {
@@ -116,7 +122,8 @@ public class PerfumeServiceImpl implements PerfumeService {
                 String formattedContent = message.getContentAsString()
                         .replace("${userName}", perfumeRequest.getName())
                         .replace("${notesPrompt}", notesPrompt)
-                        .replace("${userGender}", perfumeRequest.getGender());
+                        .replace("${userGender}", perfumeRequest.getGender())
+                        .replace("${keyword}", perfumeRequest.getKeyword());
                 message.setContent(formattedContent);
             } else if (message.isContentList()) {
                 List<Content> contentList = objectMapper.convertValue(message.getContent(), new TypeReference<List<Content>>() {});
@@ -125,7 +132,8 @@ public class PerfumeServiceImpl implements PerfumeService {
                         String formattedText = item.getText()
                                 .replace("${userName}", perfumeRequest.getName())
                                 .replace("${notesPrompt}", notesPrompt)
-                                .replace("${userGender}", perfumeRequest.getGender());
+                                .replace("${userGender}", perfumeRequest.getGender())
+                                .replace("${keyword}", perfumeRequest.getKeyword());
                         item.setText(formattedText);
                     } else if ("image_url".equals(item.getType()) && item.getImageUrl() != null) {
                         String updatedUrl = item.getImageUrl().getUrl().replace("${encodedImage}", encodedImage);
@@ -145,34 +153,6 @@ public class PerfumeServiceImpl implements PerfumeService {
         } catch (IOException e) {
             throw new ImageEncodingException("Failed to encode image");
         }
-    }
-
-    private List<String> extractSelectedNotes(PerfumeResponseDTO chatResponse) {
-        // GPT 응답에서 Top, Middle, Base 노트의 이름을 추출하는 로직
-        List<String> selectedNotes = new ArrayList<>();
-
-        String topNote = parseNoteName(chatResponse.getTopNote());
-        String middleNote = parseNoteName(chatResponse.getMiddleNote());
-        String baseNote = parseNoteName(chatResponse.getBaseNote());
-
-        log.info("Extracted Top Note: {}", topNote);
-        log.info("Extracted Middle Note: {}", middleNote);
-        log.info("Extracted Base Note: {}", baseNote);
-        
-        selectedNotes.add(topNote);
-        selectedNotes.add(middleNote);
-        selectedNotes.add(baseNote);
-    
-        return selectedNotes;
-    }
-
-    private String parseNoteName(String note) {
-        // 노트 문자열에서 노트 이름 부분을 추출하는 로직
-        // 예: "AC'SCENT 06 그린 망고, 연꽃 | ..."에서 "AC'SCENT 06 그린 망고, 연꽃"만 추출
-        if (note != null && note.contains("|")) {
-            return note.split("\\|")[0].trim();
-        }
-        return note;
     }
 
     private String saveImage(MultipartFile image, String userName) {
@@ -210,4 +190,43 @@ public class PerfumeServiceImpl implements PerfumeService {
 
         return fileName;
     }
+
+    private Perfume convertToModel(PerfumeRequestDTO perfumeRequest, ParsedGptResponse parsedGptResponse, String imageName) {
+        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getTopNote());
+        Appearance appearance = parsedGptResponse.getAppearance();
+        return Perfume.builder()
+            .code(perfumeRequest.getCode())
+            .userName(perfumeRequest.getName())
+            .mainNote(selectedNote)
+            .appearance(appearance)
+            .profile(parsedGptResponse.getProfile())
+            .imageName(imageName)
+            .build();
+    }
+    
+    private PerfumeResponseDTO convertToDto(Perfume perfume) {
+        MainNote selectedNote = perfume.getMainNote();
+
+        return PerfumeResponseDTO.builder()
+            .id(perfume.getId())
+            .userName(perfume.getUserName())
+            .perfumeName(selectedNote.getPerfumeName())
+            .mainNote(selectedNote.getName())
+            .mainNoteDesc(selectedNote.getScent())
+            .middleNote(selectedNote.getMiddleNote().getName())
+            .middleNoteDesc(selectedNote.getMiddleNote().getScent())
+            .baseNote(selectedNote.getBaseNote().getName())
+            .baseNoteDesc(selectedNote.getBaseNote().getScent())
+            .appearance(perfume.getAppearance())
+            .profile(perfume.getProfile())
+            .imageName(perfume.getImageName())
+            .citrus(selectedNote.getCitrus())
+            .floral(selectedNote.getFloral())
+            .woody(selectedNote.getWoody())
+            .watery(selectedNote.getWatery())
+            .fruity(selectedNote.getFruity())
+            .spicy(selectedNote.getSpicy())
+            .build();
+    }
+
 }

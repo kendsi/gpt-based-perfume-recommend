@@ -1,10 +1,15 @@
 package com.acscent.chatdemo2.model;
 
+import com.acscent.chatdemo2.data.Appearance;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Data;
@@ -27,17 +32,15 @@ public class Perfume {
     @Column(name = "perfume_name", nullable = false)
     private String perfumeName;
 
-    @Column(name = "insights", columnDefinition = "TEXT")
-    private String insights;
+    @ManyToOne
+    @JoinColumn(name = "main_note_id", nullable = false)
+    private MainNote mainNote;
 
-    @Column(name = "top_note_id")
-    private Long topNoteId;
+    @Embedded
+    private Appearance appearance;
 
-    @Column(name = "middle_note_id")
-    private Long middleNoteId;
-
-    @Column(name = "base_note_id")
-    private Long baseNoteId;
+    @Column(name = "profile", columnDefinition = "TEXT")
+    private String profile;
 
     @Column(name = "image_name", nullable = false)
     private String imageName;
@@ -45,15 +48,14 @@ public class Perfume {
     public Perfume() {}
 
     @Builder
-    public Perfume(Long id, String code, String userName, String perfumeName, String insights, Long topNoteId, Long middleNoteId, Long baseNoteId, String imageName) {
+    public Perfume(Long id, String code, String userName, MainNote mainNote, Appearance appearance, String profile, String imageName) {
         this.id = id;
         this.code = code;
         this.userName = userName;
-        this.perfumeName = perfumeName;
-        this.insights = insights;
-        this.topNoteId = topNoteId;
-        this.middleNoteId = middleNoteId;
-        this.baseNoteId = baseNoteId;
+        this.perfumeName = mainNote.getPerfumeName();
+        this.mainNote = mainNote;
+        this.appearance = appearance;
+        this.profile = profile;
         this.imageName = imageName;
     }
 }

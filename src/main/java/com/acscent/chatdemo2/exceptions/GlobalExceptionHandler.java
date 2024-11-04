@@ -12,12 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(SheetsValueException.class)
-    public ResponseEntity<?> handleSheetsValueException(SheetsValueException ex) {
-        log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(CodeAlreadyUsedException.class)
     public ResponseEntity<?> handleCodeAlreadyUsedException(CodeAlreadyUsedException ex) {
         log.error(ex.getMessage(), ex);
@@ -54,22 +48,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(JsonFormattingException.class)
-    public ResponseEntity<String> handleJsonFormattingException(JsonFormattingException ex) {
-        log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(GoogleApiException.class)
-    public ResponseEntity<String> handleGoogleApiException(GoogleApiException ex) {
-        log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(InvalidLanguageInputException.class)
     public ResponseEntity<String> handleInvalidLanguageInputException(InvalidLanguageInputException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GptImageProcessingException.class)
+    public ResponseEntity<String> handleGptImageProcessingException(GptImageProcessingException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(NoteNotFoundException.class)

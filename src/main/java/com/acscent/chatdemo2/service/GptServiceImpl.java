@@ -38,13 +38,11 @@ public class GptServiceImpl implements GptService {
 
         // model: "gpt-4-turbo-2024-04-09",
         GptRequestDTO requestDTO = GptRequestDTO.builder()
-                .model("chatgpt-4o-latest")
+                .model("gpt-4o-2024-05-13")
                 .messages(prompt)
                 .build();
 
         HttpEntity<GptRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
-
-        log.info("Sending GPT Request: {}", requestDTO);
 
         try {
             GptResponseDTO response = restTemplate.exchange(

@@ -1,17 +1,15 @@
-package com.acscent.chatdemo2.dto;
+package com.acscent.chatdemo2.data;
 
-import com.google.auto.value.AutoValue.Builder;
-
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class ChatResponseDTO {
-    
+public class ParsedGptResponse {
     private String perfumeName;
-    private String insights;
     private String topNote;
     private String middleNote;
     private String baseNote;
+    private Appearance appearance;
+    private String profile;
 }
-
