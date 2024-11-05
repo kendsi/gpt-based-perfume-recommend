@@ -2,25 +2,20 @@ package com.acscent.chatdemo2.dto;
 
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-
-@Getter
-@Setter
+@Data
 public class GptResponseDTO {
     private List<Choice> choices;
 
     public GptResponseDTO() {}
 
-    @Getter
-    @Setter
+    @Data
     public static class Choice {
         private Message message;
     }
 
-    @Getter
-    @Setter
+    @Data
     public static class Message {
         private String content;
     }

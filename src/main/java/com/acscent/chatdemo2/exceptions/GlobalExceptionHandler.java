@@ -12,16 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(SheetsValueException.class)
-    public ResponseEntity<?> handleSheetsValueException(SheetsValueException ex) {
-        log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(CodeAlreadyUsedException.class)
     public ResponseEntity<?> handleCodeAlreadyUsedException(CodeAlreadyUsedException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CodeNotFoundException.class)
+    public ResponseEntity<?> handleCodeNotFoundException(CodeNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(GptResponseParsingException.class)
@@ -36,20 +36,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(PromptFormattingException.class)
-    public ResponseEntity<String> handlePromptFormattingException(PromptFormattingException ex) {
+    @ExceptionHandler(ImageEncodingException.class)
+    public ResponseEntity<String> handleImageEncodingException(ImageEncodingException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(JsonFormattingException.class)
-    public ResponseEntity<String> handleJsonFormattingException(JsonFormattingException ex) {
-        log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(GoogleApiException.class)
-    public ResponseEntity<String> handleGoogleApiException(GoogleApiException ex) {
+    @ExceptionHandler(PromptLoadingException.class)
+    public ResponseEntity<String> handlePromptLoadingException(PromptLoadingException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -58,5 +52,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<String> handleInvalidLanguageInputException(InvalidLanguageInputException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GptImageProcessingException.class)
+    public ResponseEntity<String> handleGptImageProcessingException(GptImageProcessingException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NoteNotFoundException.class)
+    public ResponseEntity<String> handleNoteNotFoundException(NoteNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<String> handleFileNotFoundException(ImageNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ImageSavingException.class)
+    public ResponseEntity<String> handleImageSavingException(ImageSavingException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
