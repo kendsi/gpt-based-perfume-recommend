@@ -66,6 +66,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ImageNotFoundException.class)
+    public ResponseEntity<String> handleFileNotFoundException(ImageNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(ImageSavingException.class)
     public ResponseEntity<String> handleImageSavingException(ImageSavingException ex) {
         log.error(ex.getMessage(), ex);

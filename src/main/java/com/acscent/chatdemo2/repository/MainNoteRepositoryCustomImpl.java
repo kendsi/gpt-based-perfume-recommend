@@ -24,7 +24,7 @@ public class MainNoteRepositoryCustomImpl implements MainNoteRepositoryCustom {
         if (preferred.contains("citrus")) builder.and(mainNote.citrus.goe(6));
         if (preferred.contains("floral")) builder.and(mainNote.floral.goe(6));
         if (preferred.contains("woody")) builder.and(mainNote.woody.goe(6));
-        if (preferred.contains("watery")) builder.and(mainNote.watery.goe(6));
+        if (preferred.contains("musk")) builder.and(mainNote.musk.goe(6));
         if (preferred.contains("fruity")) builder.and(mainNote.fruity.goe(6));
         if (preferred.contains("spicy")) builder.and(mainNote.spicy.goe(6));
 
@@ -32,7 +32,7 @@ public class MainNoteRepositoryCustomImpl implements MainNoteRepositoryCustom {
         if (disliked.contains("citrus")) builder.and(mainNote.citrus.loe(4));
         if (disliked.contains("floral")) builder.and(mainNote.floral.loe(4));
         if (disliked.contains("woody")) builder.and(mainNote.woody.loe(4));
-        if (disliked.contains("watery")) builder.and(mainNote.watery.loe(4));
+        if (disliked.contains("musk")) builder.and(mainNote.musk.loe(4));
         if (disliked.contains("fruity")) builder.and(mainNote.fruity.loe(4));
         if (disliked.contains("spicy")) builder.and(mainNote.spicy.loe(4));
 

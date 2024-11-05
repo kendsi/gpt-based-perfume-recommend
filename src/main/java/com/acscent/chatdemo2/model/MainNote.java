@@ -24,15 +24,15 @@ public class MainNote {
     private String scent;
     private String perfumeName;
 
-    @Column(length = 500)
+    @Column(length = 1000)
     private String description;
-    @Column(length = 500)
+    @Column(length = 1000)
     private String recommendation;
     
     private int citrus;
     private int floral;
     private int woody;
-    private int watery;
+    private int musk;
     private int fruity;
     private int spicy;
 
@@ -47,7 +47,7 @@ public class MainNote {
     public MainNote() {}
 
     @Builder
-    public MainNote(Long id, String name, String scent, String description, String recommendation, String perfumeName, int citrus, int floral, int woody, int watery, int fruity, int spicy, SubNote middleNote, SubNote baseNote) {
+    public MainNote(Long id, String name, String scent, String description, String recommendation, String perfumeName, int citrus, int floral, int woody, int musk, int fruity, int spicy, SubNote middleNote, SubNote baseNote) {
         this.id = id;
         this.name = name;
         this.scent = scent;
@@ -57,7 +57,7 @@ public class MainNote {
         this.citrus = citrus;
         this.floral = floral;
         this.woody = woody;
-        this.watery = watery;
+        this.musk = musk;
         this.fruity = fruity;
         this.spicy = spicy;
         this.middleNote = middleNote;

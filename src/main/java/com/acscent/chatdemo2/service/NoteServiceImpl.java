@@ -55,10 +55,10 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public MainNote getSelectedNote(String noteName) {
+    public MainNote getSelectedNote(String perfumeName) {
 
-        MainNote selectedNote = mainNoteRepository.findByName(noteName)
-                            .orElseThrow(() -> new NoteNotFoundException("Note not found with name: " + noteName));
+        MainNote selectedNote = mainNoteRepository.findByPerfumeName(perfumeName)
+                            .orElseThrow(() -> new NoteNotFoundException("Note not found with perfume name: " + perfumeName));
 
         return selectedNote;
     }

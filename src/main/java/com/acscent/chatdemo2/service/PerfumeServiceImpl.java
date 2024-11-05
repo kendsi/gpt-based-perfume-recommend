@@ -1,7 +1,7 @@
 package com.acscent.chatdemo2.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,27 +9,22 @@ import com.acscent.chatdemo2.data.Appearance;
 import com.acscent.chatdemo2.data.ParsedGptResponse;
 import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
 import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
-import com.acscent.chatdemo2.dto.GptRequestDTO.Content;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
-import com.acscent.chatdemo2.exceptions.InvalidLanguageInputException;
-import com.acscent.chatdemo2.exceptions.ImageEncodingException;
+import com.acscent.chatdemo2.exceptions.ImageNotFoundException;
 import com.acscent.chatdemo2.exceptions.ImageSavingException;
-import com.acscent.chatdemo2.exceptions.PromptLoadingException;
 import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.model.Perfume;
 import com.acscent.chatdemo2.repository.PerfumeRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import java.io.File;
 
@@ -42,29 +37,17 @@ public class PerfumeServiceImpl implements PerfumeService {
     private final GptResponseParser gptResponseParser;
     private final NoteService noteService;
     private final PerfumeRepository perfumeRepository;
-    private final ObjectMapper objectMapper;
-
-    @Value("classpath:prompts/korean_prompt.json")
-    private Resource koreanPrompt;
-    
-    @Value("classpath:prompts/english_prompt.json")
-    private Resource englishPrompt;
-
-    @Value("classpath:prompts/japanese_prompt.json")
-    private Resource japanesePrompt;
-    
-    @Value("classpath:prompts/chinese_prompt.json")
-    private Resource chinesePrompt;
+    private final PromptService promptService;
 
     @Override
     public PerfumeResponseDTO createPerfume(PerfumeRequestDTO perfumeRequest) {
 
         log.info("Language: " + perfumeRequest.getLanguage());
-        List<Message> prompt = loadPrompt(perfumeRequest.getLanguage());
-        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreferred(), perfumeRequest.getDisliked());
+        List<Message> prompt = promptService.loadPrompt(perfumeRequest.getLanguage());
+        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreferredScent(), perfumeRequest.getDislikedScent());
         log.info(notePrompt);
 
-        List<Message> formattedPrompt = formatPrompt(perfumeRequest, prompt, notePrompt);
+        List<Message> formattedPrompt = promptService.formatPrompt(perfumeRequest, prompt, notePrompt);
 
         ParsedGptResponse parsedGptResponse = gptResponseParser.parseGptResponse(gptService.requestToGpt(formattedPrompt));
 
@@ -90,68 +73,20 @@ public class PerfumeServiceImpl implements PerfumeService {
     }
 
     @Override
-    public List<PerfumeResponseDTO> getAllPerfumeResults() {
-        List<Perfume> perfumeList = perfumeRepository.findAll();
-        return perfumeList.stream()
-                        .map(this::convertToDto)
-                        .collect(Collectors.toList());
-    }
+    public Resource getImage(String fileName) {
+        String dirPath = System.getProperty("user.home") + "/images";
 
-    private List<Message> loadPrompt(String language) {
         try {
-            if (language.equals("kor")) {
-                return objectMapper.readValue(koreanPrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            } else if (language.equals("eng")) {
-                return objectMapper.readValue(englishPrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            } else if (language.equals("jp")) {
-                return objectMapper.readValue(japanesePrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            } else if (language.equals("cn")) {
-                return objectMapper.readValue(chinesePrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            }
-        } catch (IOException e) {
-            throw new PromptLoadingException("Cannot Load Prompt for language: " + language);
-        }
-        throw new InvalidLanguageInputException("Invalid Language Input: " + language);
-    }
+            Path filePath = Paths.get(dirPath, fileName);
+            Resource resource = new UrlResource(filePath.toUri());
 
-    private List<Message> formatPrompt(PerfumeRequestDTO perfumeRequest, List<Message> prompt, String notesPrompt) {
-        String encodedImage = encodeImage(perfumeRequest.getImage());
-    
-        prompt.forEach(message -> {
-            if (message.isContentString()) {
-                String formattedContent = message.getContentAsString()
-                        .replace("${userName}", perfumeRequest.getName())
-                        .replace("${notesPrompt}", notesPrompt)
-                        .replace("${userGender}", perfumeRequest.getGender())
-                        .replace("${keyword}", perfumeRequest.getKeyword());
-                message.setContent(formattedContent);
-            } else if (message.isContentList()) {
-                List<Content> contentList = objectMapper.convertValue(message.getContent(), new TypeReference<List<Content>>() {});
-                contentList.forEach(item -> {
-                    if ("text".equals(item.getType()) && item.getText() != null) {
-                        String formattedText = item.getText()
-                                .replace("${userName}", perfumeRequest.getName())
-                                .replace("${notesPrompt}", notesPrompt)
-                                .replace("${userGender}", perfumeRequest.getGender())
-                                .replace("${keyword}", perfumeRequest.getKeyword());
-                        item.setText(formattedText);
-                    } else if ("image_url".equals(item.getType()) && item.getImageUrl() != null) {
-                        String updatedUrl = item.getImageUrl().getUrl().replace("${encodedImage}", encodedImage);
-                        item.getImageUrl().setUrl(updatedUrl);
-                    }
-                });
-                message.setContent(contentList);
+            if (resource.exists() && resource.isReadable()) {
+                return resource;
+            } else {
+                throw new ImageNotFoundException("Image not found: " + dirPath + fileName);
             }
-        });
-    
-        return prompt;
-    }
-
-    private String encodeImage(MultipartFile image) {
-        try {
-            return Base64.getEncoder().encodeToString(image.getBytes());
-        } catch (IOException e) {
-            throw new ImageEncodingException("Failed to encode image");
+        } catch (Exception e) {
+            throw new ImageNotFoundException("Image not found: " + dirPath + fileName);
         }
     }
 
@@ -192,7 +127,7 @@ public class PerfumeServiceImpl implements PerfumeService {
     }
 
     private Perfume convertToModel(PerfumeRequestDTO perfumeRequest, ParsedGptResponse parsedGptResponse, String imageName) {
-        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getTopNote());
+        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getPerfumeName());
         Appearance appearance = parsedGptResponse.getAppearance();
         return Perfume.builder()
             .code(perfumeRequest.getCode())
@@ -223,7 +158,7 @@ public class PerfumeServiceImpl implements PerfumeService {
             .citrus(selectedNote.getCitrus())
             .floral(selectedNote.getFloral())
             .woody(selectedNote.getWoody())
-            .watery(selectedNote.getWatery())
+            .musk(selectedNote.getMusk())
             .fruity(selectedNote.getFruity())
             .spicy(selectedNote.getSpicy())
             .build();

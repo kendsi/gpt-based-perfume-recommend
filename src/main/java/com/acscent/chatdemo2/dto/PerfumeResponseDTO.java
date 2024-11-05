@@ -31,7 +31,7 @@ public class PerfumeResponseDTO {
     private int citrus;
     private int floral;
     private int woody;
-    private int watery;
+    private int musk;
     private int fruity;
     private int spicy;
 }

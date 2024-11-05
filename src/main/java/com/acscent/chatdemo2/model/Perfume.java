@@ -39,7 +39,7 @@ public class Perfume {
     @Embedded
     private Appearance appearance;
 
-    @Column(name = "profile", columnDefinition = "TEXT")
+    @Column(name = "profile", nullable = false, length = 5000)
     private String profile;
 
     @Column(name = "image_name", nullable = false)
