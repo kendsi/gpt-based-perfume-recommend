@@ -26,7 +26,7 @@ public class PerfumeResponseDTO {
 
     private String profile;
 
-    private String imageName;
+    private String imageUrl;
 
     private int citrus;
     private int floral;

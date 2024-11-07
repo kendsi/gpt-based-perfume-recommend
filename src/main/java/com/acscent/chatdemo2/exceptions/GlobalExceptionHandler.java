@@ -72,8 +72,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ImageSavingException.class)
-    public ResponseEntity<String> handleImageSavingException(ImageSavingException ex) {
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<String> handleImageUploadException(ImageUploadException ex) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -42,13 +42,13 @@ public class Perfume {
     @Column(name = "profile", nullable = false, length = 5000)
     private String profile;
 
-    @Column(name = "image_name", nullable = false)
-    private String imageName;
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
 
     public Perfume() {}
 
     @Builder
-    public Perfume(Long id, String code, String userName, MainNote mainNote, Appearance appearance, String profile, String imageName) {
+    public Perfume(Long id, String code, String userName, MainNote mainNote, Appearance appearance, String profile, String imageUrl) {
         this.id = id;
         this.code = code;
         this.userName = userName;
@@ -56,6 +56,6 @@ public class Perfume {
         this.mainNote = mainNote;
         this.appearance = appearance;
         this.profile = profile;
-        this.imageName = imageName;
+        this.imageUrl = imageUrl;
     }
 }
