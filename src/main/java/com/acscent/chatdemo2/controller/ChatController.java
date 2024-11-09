@@ -3,7 +3,6 @@ package com.acscent.chatdemo2.controller;
 import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
 import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
 import com.acscent.chatdemo2.dto.UserCodeRequestDTO;
-import com.acscent.chatdemo2.dto.UserCodeResponseDTO;
 import com.acscent.chatdemo2.service.PerfumeService;
 import com.acscent.chatdemo2.service.UserCodeService;
 
@@ -40,12 +39,13 @@ public class ChatController {
     }
     
     @PostMapping("/api/passcode")
-    public ResponseEntity<UserCodeResponseDTO> verifyPassCode(@RequestBody UserCodeRequestDTO userCodeRequestDTO) {
+    public ResponseEntity<Void> verifyPassCode(@RequestBody UserCodeRequestDTO userCodeRequestDTO) {
         String code = userCodeRequestDTO.getCode();
         if (code.equals("") || code == null) {
             throw new IllegalArgumentException("Please Enter Code");
         }
-        return new ResponseEntity<>(userCodeService.verifyCode(code), HttpStatus.OK);
+        userCodeService.verifyCode(code);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
     
     @PostMapping(value = "/api/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

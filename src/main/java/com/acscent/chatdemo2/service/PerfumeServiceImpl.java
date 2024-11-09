@@ -33,7 +33,7 @@ public class PerfumeServiceImpl implements PerfumeService {
 
         log.info("Language: " + perfumeRequest.getLanguage());
         List<Message> prompt = promptService.loadPrompt(perfumeRequest.getLanguage());
-        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreferredScent(), perfumeRequest.getDislikedScent());
+        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreference());
         log.info(notePrompt);
 
         List<Message> formattedPrompt = promptService.formatPrompt(perfumeRequest, prompt, notePrompt);
@@ -65,7 +65,6 @@ public class PerfumeServiceImpl implements PerfumeService {
         MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getPerfumeName());
         Appearance appearance = parsedGptResponse.getAppearance();
         return Perfume.builder()
-            .code(perfumeRequest.getCode())
             .userName(perfumeRequest.getName())
             .mainNote(selectedNote)
             .appearance(appearance)
@@ -83,13 +82,16 @@ public class PerfumeServiceImpl implements PerfumeService {
             .perfumeName(selectedNote.getPerfumeName())
             .mainNote(selectedNote.getName())
             .mainNoteDesc(selectedNote.getScent())
+            .mainNoteImageUrl(selectedNote.getImageUrl())
             .middleNote(selectedNote.getMiddleNote().getName())
             .middleNoteDesc(selectedNote.getMiddleNote().getScent())
+            .middleNoteImageUrl(selectedNote.getMiddleNote().getImageUrl())
             .baseNote(selectedNote.getBaseNote().getName())
             .baseNoteDesc(selectedNote.getBaseNote().getScent())
+            .baseNoteImageUrl(selectedNote.getBaseNote().getImageUrl())
             .appearance(perfume.getAppearance())
             .profile(perfume.getProfile())
-            .imageUrl(perfume.getImageUrl())
+            .userImageUrl(perfume.getImageUrl())
             .citrus(selectedNote.getCitrus())
             .floral(selectedNote.getFloral())
             .woody(selectedNote.getWoody())
