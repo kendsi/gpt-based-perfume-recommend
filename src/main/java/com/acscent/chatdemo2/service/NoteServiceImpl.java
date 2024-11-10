@@ -2,6 +2,8 @@ package com.acscent.chatdemo2.service;
 
 import org.springframework.stereotype.Service;
 
+import com.acscent.chatdemo2.data.Preference;
+import com.acscent.chatdemo2.data.Preference.Scent;
 import com.acscent.chatdemo2.exceptions.NoteNotFoundException;
 import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.repository.MainNoteRepository;
@@ -9,6 +11,7 @@ import com.acscent.chatdemo2.repository.MainNoteRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +20,15 @@ public class NoteServiceImpl implements NoteService {
     private final MainNoteRepository mainNoteRepository;
 
     @Override
-    public String getFilteredNotes(List<String> preferred, List<String> disliked) {
+    public String getFilteredNotes(Preference preference) {
+
+        List<String> preferred = preference.getPreferred().stream()
+                                          .map(Scent::getLabel)
+                                          .collect(Collectors.toList());
+
+        List<String> disliked = preference.getDisliked().stream()
+                                                .map(Scent::getLabel)
+                                                .collect(Collectors.toList());
 
         List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked);
 

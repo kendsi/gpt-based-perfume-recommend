@@ -22,12 +22,14 @@ public class MainNote {
 
     private String name;
     private String scent;
-    private String perfumeName;
 
     @Column(length = 1000)
     private String description;
     @Column(length = 1000)
     private String recommendation;
+
+    private String perfumeName;
+    private String imageUrl;
     
     private int citrus;
     private int floral;
@@ -47,7 +49,7 @@ public class MainNote {
     public MainNote() {}
 
     @Builder
-    public MainNote(Long id, String name, String scent, String description, String recommendation, String perfumeName, int citrus, int floral, int woody, int musk, int fruity, int spicy, SubNote middleNote, SubNote baseNote) {
+    public MainNote(Long id, String name, String scent, String description, String recommendation, String perfumeName, String imageUrl, int citrus, int floral, int woody, int musk, int fruity, int spicy, SubNote middleNote, SubNote baseNote) {
         this.id = id;
         this.name = name;
         this.scent = scent;

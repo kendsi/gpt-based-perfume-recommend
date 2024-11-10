@@ -19,12 +19,15 @@ public class SubNote {
     private String name;
     private String scent;
 
+    private String imageUrl;
+
     public SubNote() {}
 
     @Builder
-    public SubNote(Long id, String name, String scent) {
+    public SubNote(Long id, String name, String scent, String imageUrl) {
         this.id = id;
         this.name = name;
         this.scent = scent;
+        this.imageUrl = imageUrl;
     }
 }
