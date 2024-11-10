@@ -10,6 +10,7 @@ import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
 import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.model.Perfume;
 import com.acscent.chatdemo2.repository.PerfumeRepository;
+import com.acscent.chatdemo2.util.GptResponseParser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

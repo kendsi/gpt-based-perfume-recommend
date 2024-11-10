@@ -1,4 +1,4 @@
-package com.acscent.chatdemo2.service;
+package com.acscent.chatdemo2.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

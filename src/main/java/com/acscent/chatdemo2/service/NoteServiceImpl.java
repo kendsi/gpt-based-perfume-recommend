@@ -3,7 +3,7 @@ package com.acscent.chatdemo2.service;
 import org.springframework.stereotype.Service;
 
 import com.acscent.chatdemo2.data.Preference;
-import com.acscent.chatdemo2.data.Preference.Scent;
+import com.acscent.chatdemo2.data.Scent;
 import com.acscent.chatdemo2.exceptions.NoteNotFoundException;
 import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.repository.MainNoteRepository;
