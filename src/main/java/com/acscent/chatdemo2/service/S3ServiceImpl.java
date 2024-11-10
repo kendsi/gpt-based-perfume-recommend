@@ -39,7 +39,7 @@ public class S3ServiceImpl implements S3Service {
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");
             String formattedDateTime = LocalDateTime.now().format(formatter);
-            String imagePath = "images/" + formattedDateTime + "-" + userName + fileExtension;
+            String imagePath = "user/" + formattedDateTime + "-" + userName + fileExtension;
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(image.getContentType());
