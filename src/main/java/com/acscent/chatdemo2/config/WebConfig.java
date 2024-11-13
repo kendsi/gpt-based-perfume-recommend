@@ -15,8 +15,8 @@ public class WebConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://perfume-maker.pixent.co.kr")  // 허용할 도메인
-                        .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE")  // 허용할 HTTP 메서드
+                        .allowedOriginPatterns("https://*.pixent.co.kr", "http://localhost:5173")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")  // 허용할 HTTP 메서드
                         .allowedHeaders("*")  // 허용할 헤더
                         .allowCredentials(true);  // 자격 증명 허용
             }

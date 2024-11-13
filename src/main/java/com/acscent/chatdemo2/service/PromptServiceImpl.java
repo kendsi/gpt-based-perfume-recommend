@@ -43,13 +43,13 @@ public class PromptServiceImpl implements PromptService {
     @Override
     public List<Message> loadPrompt(String language) {
         try {
-            if (language.equals("kor")) {
+            if (language.equals("ko")) {
                 return objectMapper.readValue(koreanPrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            } else if (language.equals("eng")) {
+            } else if (language.equals("en")) {
                 return objectMapper.readValue(englishPrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            } else if (language.equals("jp")) {
+            } else if (language.equals("ja")) {
                 return objectMapper.readValue(japanesePrompt.getInputStream(), new TypeReference<List<Message>>() {});
-            } else if (language.equals("cn")) {
+            } else if (language.equals("zh")) {
                 return objectMapper.readValue(chinesePrompt.getInputStream(), new TypeReference<List<Message>>() {});
             }
         } catch (IOException e) {

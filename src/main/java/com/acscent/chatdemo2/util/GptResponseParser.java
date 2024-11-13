@@ -22,8 +22,11 @@ public class GptResponseParser {
     private static final Pattern VIBE_PATTERN = Pattern.compile("VIBE: (.*?)\\n", Pattern.DOTALL);
 
     private static final Pattern TOP_NOTE_NAME_PATTERN = Pattern.compile("TOP NOTE: (.*?)\\n", Pattern.DOTALL);
+    private static final Pattern TOP_NOTE_ANALYSIS_PATTERN = Pattern.compile("TOP NOTE ANALYSIS: (.*?)\\n", Pattern.DOTALL);
     private static final Pattern MIDDLE_NOTE_NAME_PATTERN = Pattern.compile("MIDDLE NOTE: (.*?)\\n", Pattern.DOTALL);
+    private static final Pattern MIDDLE_NOTE_ANALYSIS_PATTERN = Pattern.compile("MIDDLE NOTE ANALYSIS: (.*?)\\n", Pattern.DOTALL);
     private static final Pattern BASE_NOTE_NAME_PATTERN = Pattern.compile("BASE NOTE: (.*?)\\n", Pattern.DOTALL);
+    private static final Pattern BASE_NOTE_ANALYSIS_PATTERN = Pattern.compile("BASE NOTE ANALYSIS: (.*?)\\n", Pattern.DOTALL);
 
     private static final Pattern PROFILE_PATTERN = Pattern.compile("PROFILE(.*)$", Pattern.DOTALL);
 
@@ -44,16 +47,22 @@ public class GptResponseParser {
         Appearance appearance = new Appearance(facialFeature, style, vibe);
 
         String topNoteName = extractPattern(TOP_NOTE_NAME_PATTERN, content, true).trim();
+        String topNoteAnalysis = extractPattern(TOP_NOTE_ANALYSIS_PATTERN, content, true).trim();
         String middleNoteName = extractPattern(MIDDLE_NOTE_NAME_PATTERN, content, true).trim();
+        String middleNoteAnalysis = extractPattern(MIDDLE_NOTE_ANALYSIS_PATTERN, content, true).trim();
         String baseNoteName = extractPattern(BASE_NOTE_NAME_PATTERN, content, true).trim();
+        String baseNoteAnalysis = extractPattern(BASE_NOTE_ANALYSIS_PATTERN, content, true).trim();
 
         String profile = extractPattern(PROFILE_PATTERN, content, true).trim();
 
         return ParsedGptResponse.builder()
                                 .perfumeName(perfumeName)
                                 .topNote(topNoteName)
+                                .topNoteAnalysis(topNoteAnalysis)
                                 .middleNote(middleNoteName)
+                                .middleNoteAnalysis(middleNoteAnalysis)
                                 .baseNote(baseNoteName)
+                                .baseNoteAnalysis(baseNoteAnalysis)
                                 .appearance(appearance)
                                 .profile(profile)
                                 .build();

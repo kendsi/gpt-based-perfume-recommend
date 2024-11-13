@@ -18,7 +18,7 @@ public class PerfumeRequestDTO {
     @Schema(description = "사용자 성별", example = "남성")
     private String gender;
 
-    @Schema(description = "언어 설정", example = "kor")
+    @Schema(description = "언어 설정", example = "ko")
     private String language;
 
     @Schema(description = "키워드", example = "차가운")

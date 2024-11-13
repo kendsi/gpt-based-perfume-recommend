@@ -37,11 +37,11 @@ public class NoteServiceImpl implements NoteService {
         }
 
         // StringBuilder를 사용해 문자열을 생성
-        StringBuilder result = new StringBuilder("현재 추천 가능한 향수 리스트:\n");
+        StringBuilder result = new StringBuilder("The List Of Recommended Notes Set:\n");
         filteredMainNotes.forEach(note -> {
             result
-                .append("Perfume: ")
-                .append(note.getPerfumeName())
+                .append("Perfume ")
+                .append(note.getId() + ": ")
                 .append("\n    Top Note: ")
                 .append(note.getName())
                 .append(", Top Note Description: ")
@@ -66,10 +66,10 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public MainNote getSelectedNote(String perfumeName) {
+    public MainNote getSelectedNote(String mainNoteName) {
 
-        MainNote selectedNote = mainNoteRepository.findByPerfumeName(perfumeName)
-                            .orElseThrow(() -> new NoteNotFoundException("Note not found with perfume name: " + perfumeName));
+        MainNote selectedNote = mainNoteRepository.findByName(mainNoteName)
+                            .orElseThrow(() -> new NoteNotFoundException("Note not found with main note name: " + mainNoteName));
 
         return selectedNote;
     }
