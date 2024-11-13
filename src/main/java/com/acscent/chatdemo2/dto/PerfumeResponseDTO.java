@@ -16,12 +16,15 @@ public class PerfumeResponseDTO {
 
     private String mainNote;
     private String mainNoteDesc;
+    private String mainNoteAnalysis;
     private String mainNoteImageUrl;
     private String middleNote;
     private String middleNoteDesc;
+    private String middleNoteAnalysis;
     private String middleNoteImageUrl;
     private String baseNote;
     private String baseNoteDesc;
+    private String baseNoteAnalysis;
     private String baseNoteImageUrl;
 
     // Appearance 분석 결과 리스트 (facialFeature, style, vibe)
