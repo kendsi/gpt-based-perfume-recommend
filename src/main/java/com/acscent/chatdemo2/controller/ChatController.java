@@ -1,11 +1,12 @@
 package com.acscent.chatdemo2.controller;
 
+import com.acscent.chatdemo2.data.Preference;
 import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
 import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
 import com.acscent.chatdemo2.dto.UserCodeRequestDTO;
 import com.acscent.chatdemo2.service.PerfumeService;
 import com.acscent.chatdemo2.service.UserCodeService;
-
+import com.acscent.chatdemo2.util.PreferenceEditor;
 import com.acscent.chatdemo2.service.ImWebService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +35,11 @@ public class ChatController {
     private final PerfumeService perfumeService;
     private final UserCodeService userCodeService;
     private final ImWebService imWebService;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(Preference.class, new PreferenceEditor());
+    }
 
     @GetMapping("/")
     public ResponseEntity<Void> healthCheck() {

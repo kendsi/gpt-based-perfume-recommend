@@ -8,8 +8,11 @@ import lombok.Data;
 public class ParsedGptResponse {
     private String perfumeName;
     private String topNote;
+    private String topNoteAnalysis;
     private String middleNote;
+    private String middleNoteAnalysis;
     private String baseNote;
+    private String baseNoteAnalysis;
     private Appearance appearance;
     private String profile;
 }

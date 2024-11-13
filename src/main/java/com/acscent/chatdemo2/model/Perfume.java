@@ -36,6 +36,15 @@ public class Perfume {
     @Embedded
     private Appearance appearance;
 
+    @Column(name = "top_note_analysis", nullable = true)
+    private String topNoteAnalysis;
+
+    @Column(name = "middle_note_analysis", nullable = true)
+    private String middleNoteAnalysis;
+
+    @Column(name = "base_note_analysis", nullable = true)
+    private String baseNoteAnalysis;
+
     @Column(name = "profile", nullable = false, length = 5000)
     private String profile;
 
@@ -45,12 +54,15 @@ public class Perfume {
     public Perfume() {}
 
     @Builder
-    public Perfume(Long id, String userName, MainNote mainNote, Appearance appearance, String profile, String imageUrl) {
+    public Perfume(Long id, String userName, MainNote mainNote, Appearance appearance, String topNoteAnalysis, String middleNoteAnalysis, String baseNoteAnalysis, String profile, String imageUrl) {
         this.id = id;
         this.userName = userName;
         this.perfumeName = mainNote.getPerfumeName();
         this.mainNote = mainNote;
         this.appearance = appearance;
+        this.topNoteAnalysis = topNoteAnalysis;
+        this.middleNoteAnalysis = middleNoteAnalysis;
+        this.baseNoteAnalysis = baseNoteAnalysis;
         this.profile = profile;
         this.imageUrl = imageUrl;
     }

@@ -10,6 +10,7 @@ import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
 import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.model.Perfume;
 import com.acscent.chatdemo2.repository.PerfumeRepository;
+import com.acscent.chatdemo2.util.GptResponseParser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,11 @@ public class PerfumeServiceImpl implements PerfumeService {
 
         log.info("NOTES");
         log.info("TOP NOTE: " + parsedGptResponse.getTopNote());
+        log.info("TOP NOTE ANALYSIS: " + parsedGptResponse.getTopNoteAnalysis());
         log.info("MIDDLE NOTE: " + parsedGptResponse.getMiddleNote());
+        log.info("MIDDLE NOTE ANALYSIS: " + parsedGptResponse.getMiddleNoteAnalysis());
         log.info("BASE NOTE: " + parsedGptResponse.getBaseNote());
+        log.info("BASE NOTE ANALYSIS: " + parsedGptResponse.getBaseNoteAnalysis());
 
         log.info("PROFILE");
         log.info(parsedGptResponse.getProfile());
@@ -62,7 +66,7 @@ public class PerfumeServiceImpl implements PerfumeService {
     }
     
     private Perfume convertToModel(PerfumeRequestDTO perfumeRequest, ParsedGptResponse parsedGptResponse, String imageUrl) {
-        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getPerfumeName());
+        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getTopNote());
         Appearance appearance = parsedGptResponse.getAppearance();
         return Perfume.builder()
             .userName(perfumeRequest.getName())

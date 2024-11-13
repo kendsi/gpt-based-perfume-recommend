@@ -8,10 +8,4 @@ import lombok.Data;
 public class Preference {
     private List<Scent> preferred;
     private List<Scent> disliked;
-
-    @Data
-    public class Scent {
-        private int id;
-        private String label;
-    }
 }
