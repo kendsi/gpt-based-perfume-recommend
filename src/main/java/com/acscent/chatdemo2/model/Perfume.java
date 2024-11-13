@@ -54,10 +54,10 @@ public class Perfume {
     public Perfume() {}
 
     @Builder
-    public Perfume(Long id, String userName, MainNote mainNote, Appearance appearance, String topNoteAnalysis, String middleNoteAnalysis, String baseNoteAnalysis, String profile, String imageUrl) {
+    public Perfume(Long id, String userName, String perfumeName, MainNote mainNote, Appearance appearance, String topNoteAnalysis, String middleNoteAnalysis, String baseNoteAnalysis, String profile, String imageUrl) {
         this.id = id;
         this.userName = userName;
-        this.perfumeName = mainNote.getPerfumeName();
+        this.perfumeName = perfumeName;
         this.mainNote = mainNote;
         this.appearance = appearance;
         this.topNoteAnalysis = topNoteAnalysis;

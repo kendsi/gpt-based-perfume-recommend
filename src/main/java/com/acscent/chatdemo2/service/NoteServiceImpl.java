@@ -20,7 +20,7 @@ public class NoteServiceImpl implements NoteService {
     private final MainNoteRepository mainNoteRepository;
 
     @Override
-    public String getFilteredNotes(Preference preference) {
+    public String getFilteredNotes(Preference preference, String language) {
 
         List<String> preferred = preference.getPreferred().stream()
                                           .map(Scent::getLabel)
@@ -30,7 +30,7 @@ public class NoteServiceImpl implements NoteService {
                                                 .map(Scent::getLabel)
                                                 .collect(Collectors.toList());
 
-        List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked);
+        List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked, language);
 
         if (filteredMainNotes.isEmpty() || filteredMainNotes == null) {
             throw new NoteNotFoundException("No notes match the specified criteria.");

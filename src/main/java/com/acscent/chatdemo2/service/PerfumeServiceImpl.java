@@ -34,7 +34,7 @@ public class PerfumeServiceImpl implements PerfumeService {
 
         log.info("Language: " + perfumeRequest.getLanguage());
         List<Message> prompt = promptService.loadPrompt(perfumeRequest.getLanguage());
-        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreference());
+        String notePrompt = noteService.getFilteredNotes(perfumeRequest.getPreference(), perfumeRequest.getLanguage());
         log.info(notePrompt);
 
         List<Message> formattedPrompt = promptService.formatPrompt(perfumeRequest, prompt, notePrompt);
@@ -70,8 +70,12 @@ public class PerfumeServiceImpl implements PerfumeService {
         Appearance appearance = parsedGptResponse.getAppearance();
         return Perfume.builder()
             .userName(perfumeRequest.getName())
+            .perfumeName(parsedGptResponse.getPerfumeName())
             .mainNote(selectedNote)
             .appearance(appearance)
+            .topNoteAnalysis(parsedGptResponse.getTopNoteAnalysis())
+            .middleNoteAnalysis(parsedGptResponse.getMiddleNoteAnalysis())
+            .baseNoteAnalysis(parsedGptResponse.getBaseNoteAnalysis())
             .profile(parsedGptResponse.getProfile())
             .imageUrl(imageUrl)
             .build();
@@ -83,7 +87,7 @@ public class PerfumeServiceImpl implements PerfumeService {
         return PerfumeResponseDTO.builder()
             .id(perfume.getId())
             .userName(perfume.getUserName())
-            .perfumeName(selectedNote.getPerfumeName())
+            .perfumeName(perfume.getPerfumeName())
             .mainNote(selectedNote.getName())
             .mainNoteDesc(selectedNote.getScent())
             .mainNoteAnalysis(perfume.getTopNoteAnalysis())

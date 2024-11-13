@@ -21,8 +21,8 @@ public class MainNote {
     private Long id;
 
     private String name;
+    @Column(length = 1000)
     private String scent;
-
     @Column(length = 1000)
     private String description;
     @Column(length = 1000)

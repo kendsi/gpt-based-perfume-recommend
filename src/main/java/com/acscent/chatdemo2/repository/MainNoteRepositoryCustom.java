@@ -4,5 +4,5 @@ import com.acscent.chatdemo2.model.MainNote;
 import java.util.List;
 
 public interface MainNoteRepositoryCustom {
-    List<MainNote> findByPreferredAndDislikedNotes(List<String> preferredNotes, List<String> dislikedNotes);
+    List<MainNote> findByPreferredAndDislikedNotes(List<String> preferredNotes, List<String> dislikedNotes, String language);
 }
