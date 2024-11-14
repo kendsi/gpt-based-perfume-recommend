@@ -87,7 +87,7 @@ public class PerfumeServiceImpl implements PerfumeService {
         return PerfumeResponseDTO.builder()
             .id(perfume.getId())
             .userName(perfume.getUserName())
-            .perfumeName(perfume.getPerfumeName())
+            .perfumeName(selectedNote.getPerfumeName())
             .mainNote(selectedNote.getName())
             .mainNoteDesc(selectedNote.getScent())
             .mainNoteAnalysis(perfume.getTopNoteAnalysis())

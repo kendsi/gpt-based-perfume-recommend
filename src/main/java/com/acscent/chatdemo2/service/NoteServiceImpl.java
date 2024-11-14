@@ -40,8 +40,8 @@ public class NoteServiceImpl implements NoteService {
         StringBuilder result = new StringBuilder("The List Of Recommended Notes Set:\n");
         filteredMainNotes.forEach(note -> {
             result
-                .append("Perfume ")
-                .append(note.getId() + ": ")
+                .append("Perfume: ")
+                .append(note.getPerfumeName())
                 .append("\n    Top Note: ")
                 .append(note.getName())
                 .append(", Top Note Description: ")
