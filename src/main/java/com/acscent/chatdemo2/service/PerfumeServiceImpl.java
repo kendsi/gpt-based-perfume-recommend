@@ -7,6 +7,7 @@ import com.acscent.chatdemo2.data.ParsedGptResponse;
 import com.acscent.chatdemo2.dto.PerfumeRequestDTO;
 import com.acscent.chatdemo2.dto.PerfumeResponseDTO;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
+import com.acscent.chatdemo2.exceptions.PerfumeNotFoundException;
 import com.acscent.chatdemo2.model.MainNote;
 import com.acscent.chatdemo2.model.Perfume;
 import com.acscent.chatdemo2.repository.PerfumeRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -66,10 +68,11 @@ public class PerfumeServiceImpl implements PerfumeService {
     }
     
     private Perfume convertToModel(PerfumeRequestDTO perfumeRequest, ParsedGptResponse parsedGptResponse, String imageUrl) {
-        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getTopNote());
+        MainNote selectedNote = noteService.getSelectedNote(parsedGptResponse.getPerfumeName(), perfumeRequest.getLanguage());
         Appearance appearance = parsedGptResponse.getAppearance();
         return Perfume.builder()
             .userName(perfumeRequest.getName())
+            .uuid(UUID.randomUUID().toString())
             .perfumeName(parsedGptResponse.getPerfumeName())
             .mainNote(selectedNote)
             .appearance(appearance)
@@ -86,6 +89,7 @@ public class PerfumeServiceImpl implements PerfumeService {
 
         return PerfumeResponseDTO.builder()
             .id(perfume.getId())
+            .uuid(perfume.getUuid())
             .userName(perfume.getUserName())
             .perfumeName(selectedNote.getPerfumeName())
             .mainNote(selectedNote.getName())
@@ -112,4 +116,11 @@ public class PerfumeServiceImpl implements PerfumeService {
             .build();
     }
 
+    @Override
+    public PerfumeResponseDTO getResult(String uuid) {
+        Perfume result = perfumeRepository.findByUuid(uuid)
+                        .orElseThrow(() -> new PerfumeNotFoundException("Result Not Found: " + uuid));
+
+        return convertToDto(result);
+    }
 }

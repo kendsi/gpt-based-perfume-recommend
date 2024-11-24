@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.acscent.chatdemo2.exceptions.InvalidLanguageInputException;
 import com.acscent.chatdemo2.model.MainNote;
@@ -41,24 +42,54 @@ public class MainNoteRepositoryCustomImpl implements MainNoteRepositoryCustom {
                 throw new InvalidLanguageInputException("Invalid Language Input: " + language);
         }
 
-        // 선호하는 향 조건 추가 (60 이상)
-        if (preferred.contains("citrus")) builder.and(mainNote.citrus.goe(60));
-        if (preferred.contains("floral")) builder.and(mainNote.floral.goe(60));
-        if (preferred.contains("woody")) builder.and(mainNote.woody.goe(60));
-        if (preferred.contains("musk")) builder.and(mainNote.musk.goe(60));
-        if (preferred.contains("fruity")) builder.and(mainNote.fruity.goe(60));
-        if (preferred.contains("spicy")) builder.and(mainNote.spicy.goe(60));
+        // 선호하는 향 조건 추가 (70 이상)
+        if (preferred.contains("citrus")) builder.and(mainNote.citrus.goe(70));
+        if (preferred.contains("floral")) builder.and(mainNote.floral.goe(70));
+        if (preferred.contains("woody")) builder.and(mainNote.woody.goe(70));
+        if (preferred.contains("musk")) builder.and(mainNote.musk.goe(70));
+        if (preferred.contains("fruity")) builder.and(mainNote.fruity.goe(70));
+        if (preferred.contains("spicy")) builder.and(mainNote.spicy.goe(70));
 
-        // 비선호하는 향 조건 추가 (40 이하)
-        if (disliked.contains("citrus")) builder.and(mainNote.citrus.loe(40));
-        if (disliked.contains("floral")) builder.and(mainNote.floral.loe(40));
-        if (disliked.contains("woody")) builder.and(mainNote.woody.loe(40));
-        if (disliked.contains("musk")) builder.and(mainNote.musk.loe(40));
-        if (disliked.contains("fruity")) builder.and(mainNote.fruity.loe(40));
-        if (disliked.contains("spicy")) builder.and(mainNote.spicy.loe(40));
+        // 비선호하는 향 조건 추가 (70 이상 제외)
+        if (disliked.contains("citrus")) builder.and(mainNote.citrus.lt(70));
+        if (disliked.contains("floral")) builder.and(mainNote.floral.lt(70));
+        if (disliked.contains("woody")) builder.and(mainNote.woody.lt(70));
+        if (disliked.contains("musk")) builder.and(mainNote.musk.lt(70));
+        if (disliked.contains("fruity")) builder.and(mainNote.fruity.lt(70));
+        if (disliked.contains("spicy")) builder.and(mainNote.spicy.lt(70));
 
         return queryFactory.selectFrom(mainNote)
                            .where(builder)
                            .fetch();
+    }
+
+    public Optional<MainNote> findByPerfumeNameAndLanguage(String perfumeName, String language) {
+        QMainNote mainNote = QMainNote.mainNote;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        switch (language) {
+            case "ko":
+                builder.and(mainNote.id.between(1, 30));
+                break;
+            case "en":
+                builder.and(mainNote.id.between(31, 60));
+                break;
+            case "ja":
+                builder.and(mainNote.id.between(61, 90));
+                break;
+            case "zh":
+                builder.and(mainNote.id.between(91, 120));
+                break;
+            default:
+                throw new InvalidLanguageInputException("Invalid Language Input: " + language);
+        }
+
+        builder.and(mainNote.perfumeName.eq(perfumeName));
+
+        return Optional.ofNullable(
+            queryFactory.selectFrom(mainNote)
+                        .where(builder)
+                        .fetchOne()
+        );
     }
 }

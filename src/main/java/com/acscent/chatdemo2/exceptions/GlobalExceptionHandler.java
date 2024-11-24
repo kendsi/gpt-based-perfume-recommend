@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.acscent.chatdemo2.dto.ErrorResponseDTO;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -13,68 +15,86 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(CodeAlreadyUsedException.class)
-    public ResponseEntity<?> handleCodeAlreadyUsedException(CodeAlreadyUsedException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleCodeAlreadyUsedException(CodeAlreadyUsedException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(CodeNotFoundException.class)
-    public ResponseEntity<?> handleCodeNotFoundException(CodeNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleCodeNotFoundException(CodeNotFoundException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.NOT_FOUND, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(GptResponseParsingException.class)
-    public ResponseEntity<?> handleGptResponseParsingException(GptResponseParsingException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleGptResponseParsingException(GptResponseParsingException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ImageEncodingException.class)
-    public ResponseEntity<String> handleImageEncodingException(ImageEncodingException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleImageEncodingException(ImageEncodingException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(PromptLoadingException.class)
-    public ResponseEntity<String> handlePromptLoadingException(PromptLoadingException ex) {
+    public ResponseEntity<ErrorResponseDTO> handlePromptLoadingException(PromptLoadingException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(InvalidLanguageInputException.class)
-    public ResponseEntity<String> handleInvalidLanguageInputException(InvalidLanguageInputException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleInvalidLanguageInputException(InvalidLanguageInputException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(GptImageProcessingException.class)
-    public ResponseEntity<String> handleGptImageProcessingException(GptImageProcessingException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleGptImageProcessingException(GptImageProcessingException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(NoteNotFoundException.class)
-    public ResponseEntity<String> handleNoteNotFoundException(NoteNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleNoteNotFoundException(NoteNotFoundException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.NOT_FOUND, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PerfumeNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNoteNotFoundException(PerfumeNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.NOT_FOUND, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ImageNotFoundException.class)
-    public ResponseEntity<String> handleFileNotFoundException(ImageNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleFileNotFoundException(ImageNotFoundException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.NOT_FOUND, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ImageUploadException.class)
-    public ResponseEntity<String> handleImageUploadException(ImageUploadException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleImageUploadException(ImageUploadException ex) {
         log.error(ex.getMessage(), ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
