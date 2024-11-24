@@ -63,6 +63,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(GptProcessingException.class)
+    public ResponseEntity<ErrorResponseDTO> handleGptProcessingException(GptProcessingException ex) {
+        log.error(ex.getMessage(), ex);
+        ErrorResponseDTO response = new ErrorResponseDTO(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(GptImageProcessingException.class)
     public ResponseEntity<ErrorResponseDTO> handleGptImageProcessingException(GptImageProcessingException ex) {
         log.error(ex.getMessage(), ex);

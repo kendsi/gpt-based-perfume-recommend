@@ -22,12 +22,12 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public String getFilteredNotes(Preference preference, String language) {
 
-        List<String> preferred = preference.getPreferred().stream()
-                                          .map(Scent::getLabel)
+        List<Integer> preferred = preference.getPreferred().stream()
+                                          .map(Scent::getId)
                                           .collect(Collectors.toList());
 
-        List<String> disliked = preference.getDisliked().stream()
-                                                .map(Scent::getLabel)
+        List<Integer> disliked = preference.getDisliked().stream()
+                                                .map(Scent::getId)
                                                 .collect(Collectors.toList());
 
         List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked, language);

@@ -21,7 +21,7 @@ public class MainNoteRepositoryCustomImpl implements MainNoteRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<MainNote> findByPreferredAndDislikedNotes(List<String> preferred, List<String> disliked, String language) {
+    public List<MainNote> findByPreferredAndDislikedNotes(List<Integer> preferred, List<Integer> disliked, String language) {
         QMainNote mainNote = QMainNote.mainNote;
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -43,20 +43,20 @@ public class MainNoteRepositoryCustomImpl implements MainNoteRepositoryCustom {
         }
 
         // 선호하는 향 조건 추가 (70 이상)
-        if (preferred.contains("citrus")) builder.and(mainNote.citrus.goe(70));
-        if (preferred.contains("floral")) builder.and(mainNote.floral.goe(70));
-        if (preferred.contains("woody")) builder.and(mainNote.woody.goe(70));
-        if (preferred.contains("musk")) builder.and(mainNote.musk.goe(70));
-        if (preferred.contains("fruity")) builder.and(mainNote.fruity.goe(70));
-        if (preferred.contains("spicy")) builder.and(mainNote.spicy.goe(70));
+        if (preferred.contains(1)) builder.and(mainNote.citrus.goe(70));
+        if (preferred.contains(2)) builder.and(mainNote.floral.goe(70));
+        if (preferred.contains(3)) builder.and(mainNote.woody.goe(70));
+        if (preferred.contains(4)) builder.and(mainNote.musk.goe(70));
+        if (preferred.contains(5)) builder.and(mainNote.fruity.goe(70));
+        if (preferred.contains(6)) builder.and(mainNote.spicy.goe(70));
 
         // 비선호하는 향 조건 추가 (70 이상 제외)
-        if (disliked.contains("citrus")) builder.and(mainNote.citrus.lt(70));
-        if (disliked.contains("floral")) builder.and(mainNote.floral.lt(70));
-        if (disliked.contains("woody")) builder.and(mainNote.woody.lt(70));
-        if (disliked.contains("musk")) builder.and(mainNote.musk.lt(70));
-        if (disliked.contains("fruity")) builder.and(mainNote.fruity.lt(70));
-        if (disliked.contains("spicy")) builder.and(mainNote.spicy.lt(70));
+        if (disliked.contains(1)) builder.and(mainNote.citrus.lt(70));
+        if (disliked.contains(2)) builder.and(mainNote.floral.lt(70));
+        if (disliked.contains(3)) builder.and(mainNote.woody.lt(70));
+        if (disliked.contains(4)) builder.and(mainNote.musk.lt(70));
+        if (disliked.contains(5)) builder.and(mainNote.fruity.lt(70));
+        if (disliked.contains(6)) builder.and(mainNote.spicy.lt(70));
 
         return queryFactory.selectFrom(mainNote)
                            .where(builder)
