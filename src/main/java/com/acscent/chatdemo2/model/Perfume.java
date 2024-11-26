@@ -23,6 +23,9 @@ public class Perfume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "uuid", nullable = false)
+    private String uuid;
+
     @Column(name = "user_name", nullable = false)
     private String userName;
 
@@ -54,10 +57,11 @@ public class Perfume {
     public Perfume() {}
 
     @Builder
-    public Perfume(Long id, String userName, MainNote mainNote, Appearance appearance, String topNoteAnalysis, String middleNoteAnalysis, String baseNoteAnalysis, String profile, String imageUrl) {
+    public Perfume(Long id, String uuid, String userName, String perfumeName, MainNote mainNote, Appearance appearance, String topNoteAnalysis, String middleNoteAnalysis, String baseNoteAnalysis, String profile, String imageUrl) {
         this.id = id;
+        this.uuid = uuid;
         this.userName = userName;
-        this.perfumeName = mainNote.getPerfumeName();
+        this.perfumeName = perfumeName;
         this.mainNote = mainNote;
         this.appearance = appearance;
         this.topNoteAnalysis = topNoteAnalysis;

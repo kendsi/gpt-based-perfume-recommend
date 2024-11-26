@@ -1,5 +1,6 @@
 package com.acscent.chatdemo2.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,7 @@ public class SubNote {
     private Long id;
 
     private String name;
+    @Column(length = 1000)
     private String scent;
 
     private String imageUrl;

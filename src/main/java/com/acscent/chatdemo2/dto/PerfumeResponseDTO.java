@@ -11,6 +11,8 @@ public class PerfumeResponseDTO {
     
     private Long id;
 
+    private String uuid;
+
     private String userName;
     private String perfumeName;
 

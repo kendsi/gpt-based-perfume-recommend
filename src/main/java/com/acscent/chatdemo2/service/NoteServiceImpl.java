@@ -20,17 +20,17 @@ public class NoteServiceImpl implements NoteService {
     private final MainNoteRepository mainNoteRepository;
 
     @Override
-    public String getFilteredNotes(Preference preference) {
+    public String getFilteredNotes(Preference preference, String language) {
 
-        List<String> preferred = preference.getPreferred().stream()
-                                          .map(Scent::getLabel)
+        List<Integer> preferred = preference.getPreferred().stream()
+                                          .map(Scent::getId)
                                           .collect(Collectors.toList());
 
-        List<String> disliked = preference.getDisliked().stream()
-                                                .map(Scent::getLabel)
+        List<Integer> disliked = preference.getDisliked().stream()
+                                                .map(Scent::getId)
                                                 .collect(Collectors.toList());
 
-        List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked);
+        List<MainNote> filteredMainNotes = mainNoteRepository.findByPreferredAndDislikedNotes(preferred, disliked, language);
 
         if (filteredMainNotes.isEmpty() || filteredMainNotes == null) {
             throw new NoteNotFoundException("No notes match the specified criteria.");
@@ -40,8 +40,8 @@ public class NoteServiceImpl implements NoteService {
         StringBuilder result = new StringBuilder("The List Of Recommended Notes Set:\n");
         filteredMainNotes.forEach(note -> {
             result
-                .append("Perfume ")
-                .append(note.getId() + ": ")
+                .append("Perfume: ")
+                .append(note.getPerfumeName())
                 .append("\n    Top Note: ")
                 .append(note.getName())
                 .append(", Top Note Description: ")
@@ -66,10 +66,10 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public MainNote getSelectedNote(String mainNoteName) {
+    public MainNote getSelectedNote(String perfumeName, String language) {
 
-        MainNote selectedNote = mainNoteRepository.findByName(mainNoteName)
-                            .orElseThrow(() -> new NoteNotFoundException("Note not found with main note name: " + mainNoteName));
+        MainNote selectedNote = mainNoteRepository.findByPerfumeNameAndLanguage(perfumeName, language)
+                            .orElseThrow(() -> new NoteNotFoundException("Note not found with main note name: " + perfumeName));
 
         return selectedNote;
     }

@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import com.acscent.chatdemo2.dto.GptRequestDTO;
 import com.acscent.chatdemo2.dto.GptResponseDTO;
 import com.acscent.chatdemo2.dto.GptRequestDTO.Message;
+import com.acscent.chatdemo2.exceptions.GptProcessingException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class GptServiceImpl implements GptService {
             }
         } catch (HttpClientErrorException e) {
             log.error("Error response from GPT: {}", e.getResponseBodyAsString());
-            throw e;
+            throw new GptProcessingException("Error response from GPT:\n" + e.getResponseBodyAsString());
         }
     }
 }
