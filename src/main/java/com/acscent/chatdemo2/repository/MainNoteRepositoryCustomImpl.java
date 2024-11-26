@@ -43,12 +43,12 @@ public class MainNoteRepositoryCustomImpl implements MainNoteRepositoryCustom {
         }
 
         // 선호하는 향 조건 추가 (70 이상)
-        if (preferred.contains(1)) builder.and(mainNote.citrus.goe(70));
-        if (preferred.contains(2)) builder.and(mainNote.floral.goe(70));
-        if (preferred.contains(3)) builder.and(mainNote.woody.goe(70));
-        if (preferred.contains(4)) builder.and(mainNote.musk.goe(70));
-        if (preferred.contains(5)) builder.and(mainNote.fruity.goe(70));
-        if (preferred.contains(6)) builder.and(mainNote.spicy.goe(70));
+        if (preferred.contains(1)) builder.or(mainNote.citrus.goe(70));
+        if (preferred.contains(2)) builder.or(mainNote.floral.goe(70));
+        if (preferred.contains(3)) builder.or(mainNote.woody.goe(70));
+        if (preferred.contains(4)) builder.or(mainNote.musk.goe(70));
+        if (preferred.contains(5)) builder.or(mainNote.fruity.goe(70));
+        if (preferred.contains(6)) builder.or(mainNote.spicy.goe(70));
 
         // 비선호하는 향 조건 추가 (70 이상 제외)
         if (disliked.contains(1)) builder.and(mainNote.citrus.lt(70));
